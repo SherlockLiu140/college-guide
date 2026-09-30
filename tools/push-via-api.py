@@ -113,12 +113,17 @@ def main():
     print("父提交 : %s" % (", ".join(p[:12] for p in parents) or "（根提交）"))
 
     # ── 找出让远端 SHA 等于本地的那一种「结尾换行」
+    #
+    # 注意：git 的 commit 对象里，日期是「<unix 时间戳> <±HHMM 时区偏移>」，
+    # 不是 ISO 格式化字符串（`git log --format=%aI` 那种）。用 ISO 拼出来的对象
+    # 哈希永远对不上。所以这里直接取本地对象里那一段原始头部字节，逐字复用，
+    # 只变动提交信息结尾的换行。
+    raw_obj = subprocess.run(["git", "cat-file", "commit", "HEAD"],
+                             capture_output=True).stdout.decode()
+    obj_head, _, obj_msg = raw_obj.partition("\n\n")
+
     def build_obj(msg_tail):
-        return (("tree %s\n" % tree)
-                + "".join("parent %s\n" % p for p in parents)
-                + "author %s <%s> %s\n" % (name, email, adate)
-                + "committer %s <%s> %s\n" % (name, email, adate)
-                + "\n" + raw_msg.rstrip("\n") + msg_tail).encode()
+        return (obj_head + "\n\n" + obj_msg.rstrip("\n") + msg_tail).encode()
 
     chosen = None
     for tail in ("\n", "", "\n\n", "\n\n\n"):
@@ -130,7 +135,8 @@ def main():
             print("提交信息结尾: %s（命中本地 SHA）" % repr(tail))
             break
     if chosen is None:
-        sys.exit("无法在本地复刻出与 HEAD 相同的提交对象，请检查提交信息里是否有异常字符。")
+        sys.exit("无法在本地复刻出与 HEAD 相同的提交对象。\n"
+                 "  本地对象头部:\n    " + obj_head.replace("\n", "\n    "))
 
     if args.dry_run:
         print("\n--dry-run：只做了本地检查，未写入远端。")

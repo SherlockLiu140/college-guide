@@ -1,0 +1,84 @@
+name: 构建并发布
+
+# 正文一改就重新生成三种格式，并把整站发到 GitHub Pages。
+# 需要在仓库 Settings → Pages 里把 Source 设为 GitHub Actions（只需设一次）。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 中文字体：PDF 排版要用。缺了这步 build-pdf.py 会明确报错并提示装什么。
+      - name: 安装中文字体
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+
+      - name: 安装 reportlab
+        run: pip install --quiet reportlab
+
+      # 这一步会先跑一致性检查（网页解析器 vs 工具解析器），不一致直接失败，
+      # 避免发出「网页上和电子书里内容不一样」的版本。
+      - name: 生成全部格式
+        run: node tools/build-all.mjs
+
+      - name: 统计产物
+        run: ls -lh dist/
+
+      - name: 上传下载用的产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: 大学生生活指南-全部格式
+          path: |
+            dist/大学生生活指南.pdf
+            dist/大学生生活指南.epub
+            dist/大学生生活指南-离线版.html
+          if-no-files-found: error
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      # 整理出一个干净的站点目录再发布：不要带 .git、tools/ 这些。
+      # 页脚有指向 skills/college-guide/README.md 的链接，所以 skills/ 要一起发。
+      - name: 整理站点目录
+        run: |
+          mkdir -p _site
+          cp index.html robots.txt .nojekyll _site/
+          cp -r book dist skills _site/
+          find _site -type f | sort
+
+      - name: 打包站点
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

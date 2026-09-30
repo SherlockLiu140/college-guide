@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大学生生活指南 · 离线单文件版</title>
+<style>
+:root{
+  --bg:#ffffff; --bg-alt:#fafaf8; --bg-mute:#f4f4f1; --bg-soft:#fbfbf9;
+  --divider:#e7e6e0; --divider-soft:#f0efea;
+  --t1:#1f1f1e; --t2:rgba(31,31,30,.74); --t3:rgba(31,31,30,.5); --t4:rgba(31,31,30,.36);
+  --brand:#2f4bb0; --brand-2:#3a5ccc; --brand-soft:rgba(47,75,176,.07);
+  --A-tx:#166a44; --A-bg:rgba(16,185,129,.11); --A-bd:rgba(16,185,129,.28);
+  --B-tx:#2f4bb0; --B-bg:rgba(47,75,176,.09); --B-bd:rgba(47,75,176,.24);
+  --C-tx:#8a5320; --C-bg:rgba(234,179,8,.16); --C-bd:rgba(234,179,8,.4);
+  --D-tx:#5c6066; --D-bg:rgba(142,150,170,.13); --D-bd:rgba(142,150,170,.3);
+  --danger-tx:#b8272c; --danger-bg:rgba(244,63,94,.09); --danger-bd:rgba(244,63,94,.24);
+  --shadow:0 1px 2px rgba(0,0,0,.035), 0 1px 3px rgba(0,0,0,.05);
+  --font:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --nav-h:58px; --side-w:296px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--t1);font:15px/1.7 var(--font);-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em}
+
+/* ---------- 顶部 ---------- */
+.nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--divider);z-index:40;
+  display:flex;align-items:center;gap:14px;padding:0 20px}
+.nav .brand{display:flex;align-items:baseline;gap:9px;flex:none}
+.nav .brand b{font-size:15px;font-weight:600}
+.nav .brand span{font-size:12px;color:var(--t4)}
+.nav .search{flex:1 1 auto;max-width:420px;margin-left:auto;position:relative}
+.nav .search input{width:100%;height:34px;padding:0 32px 0 32px;border:1px solid var(--divider);
+  border-radius:9px;background:var(--bg-soft);font:inherit;font-size:13.5px;color:var(--t1)}
+.nav .search input:focus{outline:none;border-color:var(--B-bd);background:#fff;box-shadow:0 0 0 3px var(--B-bg)}
+.nav .search .ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t4);font-size:13px;pointer-events:none}
+.nav .search .clr{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:20px;height:20px;
+  border-radius:5px;border:0;background:transparent;color:var(--t4);cursor:pointer;font-size:14px;line-height:1;display:none}
+.nav .search.has .clr{display:block}
+.nav .search .clr:hover{background:var(--bg-mute);color:var(--t1)}
+.nav .toggle{display:none;width:34px;height:34px;border:1px solid var(--divider);border-radius:9px;
+  background:#fff;cursor:pointer;color:var(--t2);font-size:15px}
+#prog{position:fixed;top:var(--nav-h);left:0;height:2px;background:var(--brand-2);width:0;z-index:41;transition:width .1s linear}
+
+/* ---------- 侧栏 ---------- */
+.side{position:fixed;top:var(--nav-h);bottom:0;left:0;width:var(--side-w);background:var(--bg-alt);
+  border-right:1px solid var(--divider);overflow-y:auto;overscroll-behavior:contain;padding:16px 0 60px;z-index:30}
+.side::-webkit-scrollbar{width:9px}
+.side::-webkit-scrollbar-thumb{background:#dcdbd5;border-radius:9px;border:2px solid var(--bg-alt)}
+.grp{padding:0 14px;margin-bottom:18px}
+.grp:last-child{margin-bottom:0}
+.gt{font-size:11.5px;font-weight:600;color:var(--t4);letter-spacing:.06em;text-transform:uppercase;
+  padding:0 4px;margin-bottom:8px;display:flex;align-items:baseline;gap:6px}
+.gt small{font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--t4)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{cursor:pointer;user-select:none;font:inherit;font-size:12.5px;line-height:1.5;padding:3px 10px;
+  border-radius:7px;border:1px solid var(--divider);background:#fff;color:var(--t2);transition:.12s}
+.chip:hover{border-color:#cfcec7;color:var(--t1)}
+.chip[aria-pressed="true"]{background:var(--t1);color:#fff;border-color:var(--t1)}
+.chip[aria-pressed="true"].gA{background:var(--A-tx);border-color:var(--A-tx)}
+.chip[aria-pressed="true"].gB{background:var(--B-tx);border-color:var(--B-tx)}
+.chip[aria-pressed="true"].gC{background:var(--C-tx);border-color:var(--C-tx)}
+.chip[aria-pressed="true"].gD{background:var(--D-tx);border-color:var(--D-tx)}
+
+/* 目录 */
+.toc-list{display:flex;flex-direction:column;gap:1px}
+.toc-row{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;cursor:pointer;
+  border:0;background:transparent;font:inherit;text-align:left;width:100%;color:var(--t2);transition:.1s}
+.toc-row:hover{background:var(--bg-mute);color:var(--t1)}
+.toc-row .no{font-family:var(--mono);font-size:11px;color:var(--t4);flex:none;width:16px}
+.toc-row .tl{flex:1;min-width:0;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toc-row .ct{font-size:11px;color:var(--t4);flex:none;font-variant-numeric:tabular-nums}
+.toc-row .cv{font-size:9px;color:var(--t4);flex:none;transition:transform .15s;margin-left:-2px}
+.toc-row.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.toc-row.on .tl,.toc-row.on .no,.toc-row.on .ct{color:var(--brand)}
+.toc-row.on .cv{transform:rotate(90deg)}
+.toc-row.dim{opacity:.32}
+.toc-sub{display:none;flex-direction:column;gap:0;padding:1px 0 5px 23px}
+.toc-sub.open{display:flex}
+.toc-sub a{display:block;font-size:12.5px;line-height:1.5;color:var(--t3);text-decoration:none;
+  padding:3px 8px;border-radius:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  border-left:1.5px solid transparent;cursor:pointer}
+.toc-sub a:hover{color:var(--t1);background:var(--bg-mute)}
+.toc-sub a.on{color:var(--brand);border-left-color:var(--brand);background:var(--brand-soft);font-weight:500}
+.toc-empty{font-size:12.5px;color:var(--t4);padding:5px 8px}
+
+/* 快捷 */
+.pre{display:flex;flex-direction:column;gap:4px}
+.pre button{cursor:pointer;font:inherit;font-size:12.5px;text-align:left;padding:5px 9px;border-radius:7px;
+  border:1px dashed var(--divider);background:transparent;color:var(--t2)}
+.pre button:hover{border-style:solid;border-color:#cfcec7;color:var(--t1);background:#fff}
+.pre button.on{border-style:solid;border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:500}
+.rst{cursor:pointer;font:inherit;font-size:12.5px;color:var(--t4);background:none;border:0;padding:2px 4px;
+  text-decoration:underline;text-align:left}
+.rst:hover{color:var(--t1)}
+
+/* ---------- 正文 ---------- */
+.content{margin-left:var(--side-w);padding:var(--nav-h) 0 0}
+.doc{max-width:770px;margin:0 auto;padding:34px 40px 120px}
+
+.doc-head h1{font-size:27px;line-height:1.35;margin-bottom:12px}
+.doc-head .lede{font-size:15px;color:var(--t2);line-height:1.75;margin:0 0 10px}
+.doc-head .lede b{color:var(--t1);font-weight:600}
+.meta{display:flex;flex-wrap:wrap;gap:0;align-items:center;margin:18px 0 0;
+  padding:12px 0;border-top:1px solid var(--divider);border-bottom:1px solid var(--divider)}
+.meta div{padding-right:16px;margin-right:16px;border-right:1px solid var(--divider-soft);line-height:1.3}
+.meta div:last-child{border-right:0;margin-right:0;padding-right:0}
+.meta b{display:block;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.meta span{font-size:11.5px;color:var(--t4)}
+.stat-live{font-size:13px;color:var(--t3);margin:16px 0 0;display:none}
+.stat-live.show{display:block}
+.stat-live b{color:var(--t1)}
+
+/* 其他格式下载 */
+.dl{display:flex;flex-wrap:wrap;align-items:stretch;gap:7px;margin:16px 0 0;
+  padding-top:14px;border-top:1px solid var(--divider-soft)}
+.dl-t{font-size:11.5px;font-weight:600;color:var(--t4);letter-spacing:.06em;align-self:center;
+  padding-right:4px;text-transform:uppercase}
+.dl a{display:block;font-size:13px;font-weight:600;color:var(--t1);text-decoration:none;
+  border:1px solid var(--divider);border-radius:9px;padding:6px 12px;background:#fff;line-height:1.45}
+.dl a:hover{border-color:var(--B-bd);background:var(--brand-soft);color:var(--brand)}
+.dl a b{display:block;font-size:11.5px;font-weight:400;color:var(--t4)}
+.dl a:hover b{color:var(--brand)}
+.dl-note{font-size:12.5px;line-height:1.75;color:var(--t3);display:block;padding:1px 0}
+
+/* 节 */
+.sec{padding-top:38px;scroll-margin-top:calc(var(--nav-h) + 14px)}
+.sec:first-of-type{padding-top:26px}
+.sec-h{display:flex;align-items:baseline;gap:10px;padding-bottom:9px;border-bottom:2px solid var(--t1)}
+.sec-h .no{font-family:var(--mono);font-size:12.5px;color:var(--t4);flex:none}
+.sec-h h2{font-size:19px;flex:1;min-width:0}
+.sec-h .n{font-size:12px;color:var(--t4);flex:none;font-variant-numeric:tabular-nums}
+.sec-pre{font-size:13.5px;color:var(--t3);line-height:1.7;margin:11px 0 0}
+.sec-pre p{margin:0 0 7px}
+.sec-pre p:last-child{margin-bottom:0}
+.sec-pre .lens{display:inline-block;font-size:12px;color:var(--t3);background:var(--bg-mute);
+  border:1px solid var(--divider);border-radius:6px;padding:1px 8px;margin-right:7px}
+.sec-pre b{color:var(--t2);font-weight:600}
+
+/* 条目 */
+.ent{padding:20px 0 4px;border-bottom:1px solid var(--divider-soft);scroll-margin-top:calc(var(--nav-h) + 14px)}
+.ent:last-child{border-bottom:0}
+.ent.hi{background:var(--brand-soft);border-radius:10px;margin:0 -14px;padding-left:14px;padding-right:14px;
+  box-shadow:0 0 0 1px var(--B-bd)}
+.ent-h{display:flex;gap:9px;align-items:baseline;margin-bottom:7px}
+.ent-no{font-family:var(--mono);font-size:11.5px;color:var(--t4);flex:none;padding-top:3px;letter-spacing:-.02em}
+.ent-t{font-size:16px;line-height:1.55;flex:1;min-width:0}
+.ent-tag{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px;padding-left:26px}
+.tg{font-size:11.5px;line-height:1.5;padding:1.5px 8px;border-radius:6px;white-space:nowrap;
+  font-variant-numeric:tabular-nums;border:1px solid transparent}
+.tgA{background:var(--A-bg);color:var(--A-tx);border-color:var(--A-bd);font-weight:600}
+.tgB{background:var(--B-bg);color:var(--B-tx);border-color:var(--B-bd);font-weight:600}
+.tgC{background:var(--C-bg);color:var(--C-tx);border-color:var(--C-bd);font-weight:600}
+.tgD{background:var(--D-bg);color:var(--D-tx);border-color:var(--D-bd);font-weight:600}
+.tgx{background:transparent;color:var(--t4);border-color:var(--divider);font-family:var(--mono);font-size:11px}
+.ent-plain{font-size:15px;line-height:1.78;color:var(--t1);margin:0 0 0 26px;padding:2px 0 2px 14px;
+  border-left:2px solid var(--divider)}
+.ent-plain strong{font-weight:600}
+.ent-btn{cursor:pointer;font:inherit;font-size:12.5px;color:var(--brand);background:none;border:0;
+  padding:0;margin:10px 0 0 26px;display:inline-block}
+.ent-btn:hover{text-decoration:underline}
+.ent-body{display:none}
+.ent.open .ent-body{display:block}
+.fld{margin:0 0 11px 26px;font-size:14px;line-height:1.75}
+.fld:first-child{margin-top:12px}
+.fld .k{display:inline-block;font-size:11.5px;font-weight:600;color:var(--t3);background:var(--bg-mute);
+  border-radius:5px;padding:1px 7px;margin-right:8px;vertical-align:1.5px;white-space:nowrap}
+.fld .v{color:var(--t2)}
+.fld .v strong{color:var(--t1);font-weight:600}
+.fld.path .k{background:var(--B-bg);color:var(--B-tx)}
+.fld.path .v{color:var(--t1)}
+.fld.note .k{background:transparent;border:1px solid var(--divider);color:var(--t4)}
+.fld.src .k{background:transparent;border:1px solid var(--divider);color:var(--t4)}
+.fld.src .v{font-size:12.5px;line-height:1.7;color:var(--t3);word-break:break-all}
+.fld.src a{text-decoration:none;border-bottom:1px solid var(--B-bd)}
+details.src-fold>summary{cursor:pointer;font-size:12px;color:var(--t4);list-style:none;display:inline-block;
+  margin:0 0 0 26px;padding:1px 0}
+details.src-fold>summary::-webkit-details-marker{display:none}
+details.src-fold>summary:hover{color:var(--brand)}
+details.src-fold>summary::before{content:"▸ ";font-size:10px}
+details.src-fold[open]>summary::before{content:"▾ "}
+details.src-fold>summary .k{display:inline-block;font-size:11.5px;font-weight:600;color:var(--t4);
+  border:1px solid var(--divider);border-radius:5px;padding:1px 7px;margin-right:6px}
+details.src-fold[open]>summary{margin-bottom:6px}
+
+.reflink{color:var(--brand);text-decoration:none;border-bottom:1px dashed var(--B-bd);cursor:pointer;white-space:nowrap}
+.reflink:hover{background:var(--brand-soft)}
+.refext{color:var(--t4);font-size:13px;border-bottom:1px dotted var(--divider);white-space:nowrap}
+
+/* 状态 */
+.status{text-align:center;color:var(--t4);font-size:13.5px;padding:70px 0}
+.bar{width:180px;height:3px;background:var(--bg-mute);border-radius:9px;margin:12px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:30%;background:var(--brand-2);border-radius:9px;
+  animation:sk 1.1s ease-in-out infinite}
+@keyframes sk{0%{transform:translateX(-110%)}100%{transform:translateX(360%)}}
+.empty{text-align:center;color:var(--t3);padding:70px 20px;font-size:14px;line-height:1.9}
+.empty button{margin-top:14px;cursor:pointer;font:inherit;font-size:13px;padding:6px 14px;border-radius:8px;
+  border:1px solid var(--divider);background:#fff;color:var(--t1)}
+.empty button:hover{border-color:#cfcec7}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-mute);padding:1px 5px;border-radius:4px}
+.warn{background:var(--danger-bg);border:1px solid var(--danger-bd);color:var(--danger-tx);
+  border-radius:10px;padding:12px 16px;font-size:13.5px;line-height:1.8;margin-bottom:6px}
+.warn b{font-weight:600}
+.foot{margin-top:52px;padding-top:20px;border-top:1px solid var(--divider);font-size:12.5px;
+  line-height:1.9;color:var(--t3)}
+.foot b{color:var(--t2);font-weight:600}
+
+#top{position:fixed;right:24px;bottom:24px;width:38px;height:38px;border-radius:10px;border:1px solid var(--divider);
+  background:#fff;box-shadow:var(--shadow);cursor:pointer;color:var(--t2);font-size:15px;display:none;z-index:35}
+#top.show{display:block}
+#top:hover{color:var(--brand);border-color:var(--B-bd)}
+#mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:29}
+
+@media (max-width:1000px){
+  :root{--side-w:0px}
+  .nav .toggle{display:block;order:-1}
+  .side{width:290px;transform:translateX(-100%);transition:transform .22s ease;box-shadow:none}
+  .side.open{transform:none;box-shadow:0 8px 40px rgba(0,0,0,.16)}
+  .side.open~#mask{display:block}
+  .content{margin-left:0}
+  .doc{padding:26px 20px 100px}
+  .nav{padding:0 14px;gap:10px}
+  .nav .search{max-width:none}
+  .nav .brand span{display:none}
+  .ent.hi{margin:0 -8px;padding-left:8px;padding-right:8px}
+}
+@media (max-width:520px){
+  .doc-head h1{font-size:22px}
+  .ent-t{font-size:15px}
+  .ent-plain{margin-left:0;padding-left:11px}
+  .ent-tag{padding-left:0}
+  .fld,details.src-fold>summary,.ent-btn{margin-left:0}
+  .meta div{padding-right:11px;margin-right:11px}
+}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <button class="toggle" id="toggle" aria-label="目录与筛选">☰</button>
+  <div class="brand"><b>大学生生活指南</b><span>按性价比排序的在校生决策清单</span></div>
+  <div class="search" id="searchwrap">
+    <span class="ico">⌕</span>
+    <input id="q" type="search" placeholder="搜条目：医保、头盔、专升本、实习报酬…" autocomplete="off" aria-label="搜索条目">
+    <button class="clr" id="qclr" aria-label="清空">✕</button>
+  </div>
+</div>
+<div id="prog"></div>
+
+<aside class="side" id="side">
+  <div class="grp">
+    <div class="gt">目录 <small id="toc-hint">点击进入，滚到哪高亮哪</small></div>
+    <nav class="toc-list" id="toc"></nav>
+  </div>
+  <div class="grp">
+    <div class="gt">快捷入口</div>
+    <div class="pre" id="presets">
+      <button data-p="lazy">只想看最省力的</button>
+      <button data-p="hard">只看证据最硬的</button>
+      <button data-p="edge">只看证据边界（D）</button>
+      <button data-p="red">只看红线（安全口径）</button>
+      <button class="rst" id="rst">清空全部条件</button>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="gt">证据等级 <small>A 硬证据 · D 无直接证据</small></div>
+    <div class="chips" id="fgrade"></div>
+  </div>
+  <div class="grp">
+    <div class="gt">花钱</div>
+    <div class="chips" id="fmoney"></div>
+  </div>
+  <div class="grp">
+    <div class="gt">花时间</div>
+    <div class="chips" id="ftime"></div>
+  </div>
+  <div class="grp">
+    <div class="gt">要毅力</div>
+    <div class="chips" id="fgrit"></div>
+  </div>
+  <div class="grp">
+    <div class="gt">收益</div>
+    <div class="chips" id="fben"></div>
+  </div>
+  <div class="grp">
+    <div class="gt">换回什么 <small>口径，不跨口径比较</small></div>
+    <div class="chips" id="fkou"></div>
+  </div>
+</aside>
+<div id="mask"></div>
+
+<main class="content">
+<div class="doc">
+
+  <div class="doc-head">
+    <h1>大学生生活指南</h1>
+    <p class="lede">改写自 <a href="https://github.com/eternity4719/HowToLiveBetter" target="_blank" rel="noopener">《高性价比人生指南》</a>。每一条都回答两个问题：<b>花掉什么，换回什么。</b></p>
+    <p class="lede">覆盖上课、复习、四六级、考证、考驾照、学生会社团、医保、兼职实习、生活费、宿舍作息，一共 <b>10 节 80 条</b>。每条的字段一栏都不省：成本、说人话、收益、证据等级、来源、备注。高职与本科有分歧的地方单列「路径」。</p>
+    <p class="lede">这份清单和普通攻略最大的区别是<b>它标出了自己不靠谱的地方</b>——每条都给了证据等级，找不到直接证据的条目一律标 D，并在备注里写明为什么只到 D。全书这样的条目有 14 条。别把 D 级当成警告，它只是诚实。</p>
+    <div class="meta" id="meta"></div>
+    <div class="dl" id="dl">
+      <span class="dl-t">其他格式</span>
+      <span class="dl-note">PDF（A4，带目录页码与书签）和 EPUB（电子书，可发到 Kindle）在项目 <code>dist/</code> 目录里。你手上这个文件本身已经是最全的一份——正文、检索、筛选都在里面。</span>
+    </div>
+    <p class="stat-live" id="live"></p>
+  </div>
+
+  <div class="status" id="status"><span>正在读取正文…</span><div class="bar"><i></i></div></div>
+  <div class="empty" id="empty" hidden>
+    没有符合条件的条目。去掉一个条件，或者换个更短的关键词。
+    <div><button id="reset2">清空全部条件</button></div>
+  </div>
+  <div id="list"></div>
+
+  <div class="foot">
+    <b>怎么读。</b>不用全做——这是一份按性价比排好的备选单，不是任务清单，挑走一两条就算数。左边点「只想看最省力的」，得到既不花钱、不花时间、不需要毅力，收益又落在最大一档的条目；点「只看证据边界」，得到剩下那些没有直接证据的条目。
+    <br><b>字段说明。</b>「成本」按钱、时间、毅力三个维度给，条目标签里的 <code>钱=0 时间=少 毅力=否</code> 就是这三项；「说人话」把「收益」里的研究口径翻成日常说法，只用「收益」栏已有的内容，不添新数字；证据等级 <b>A</b> = 有具体数字且来自随机试验、荟萃分析或官方文件，<b>B</b> = 有具体数字但来自观察性研究或官方统计，<b>C</b> = 有明文规定或公开数据但没有量化效果，<b>D</b> = 没有直接证据、来自明文规定或公开共识，并写明为什么只到 D。一句话里有两层不同强度的结论时写成两个等级，全书 7 处。
+    <br><b>署名与许可。</b>本作品改编自 <a href="https://github.com/eternity4719/HowToLiveBetter" target="_blank" rel="noopener">eternity4719《高性价比人生指南》</a>，采用与原作相同的 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">知识共享 署名 4.0 国际（CC BY 4.0）</a>许可发布。全书 <b>14 条引用了原作</b>，分布在原作第 1、5、9、14、24、30 节，每条都在「来源」或「备注」栏里标明了出处；<b>逐条对照</b>见 <a href="./NOTICE.md">NOTICE.md</a>，完整许可文本见 <a href="./LICENSE">LICENSE</a>。原作仅覆盖成年人场景，本书换了人群与口径，并新增了原著完全没有的 10 个章节。
+    <br><b>免责。</b>这是一份决策参考，不是法律意见、医疗建议或官方口径。文中涉及的法律法规、政策数字、报销比例、补贴标准等均可能随时间和地区变化，引用前请以官方最新文件为准。
+    <br><b>让 AI 照这本书回答。</b>仓库里带了一个 skill（<code>skills/college-guide</code>），Claude Code 和 Codex 都能装。装上以后直接问「大一要不要进学生会」「实习被安排上夜班怎么办」，它会先把相关条目从 <code>book/</code> 里查出来再答，并注明出自第几节第几条，看到 D 级会主动说明证据不足。装法见 <a href="./skills/college-guide/README.md">那个目录的说明</a>。
+    <br><b>你手上的这一份是离线单文件版（10 节 80 条），正文已整本内嵌，双击就能开、不用联网、可以直接在微信里传。</b>它是快照，不会随正文更新——要拿最新版，回项目目录跑 <code>node tools/build-all.mjs</code> 重新生成。
+  </div>
+</div>
+</main>
+
+<button id="top" aria-label="回到顶部">↑</button>
+
+<script>
+/* 离线版内嵌正文：10 节 80 条 */
+const EMBEDDED_BOOK = {"01-上课与听课.md":"# 第 1 节 上课与听课\n\n**口径**：时间（每周几小时）／学业（绩点、学分）／安全（学籍）\n\n本节条目按性价比从高到低排列。写得像「不要……」的是这一节想防住的结果（不要白上、不要把课搞砸），条目本身要做还是别做，以条目标题为准。\n\n---\n\n### 1. 先记住退学的红线：未经批准连续两周不参加教学活动，学校可以退学处理\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=大 口径=安全 -->\n\n- 成本：不花钱、不花时间。记住这一条就行。\n- 说人话：你连着两个星期不去上课、也没请假，学校依法可以直接把你退学。不是你一个学期挂了多科才危险，是「连续两周没人看见你」这件事本身就已经踩线了。\n- 收益：《普通高等学校学生管理规定》（教育部令第 41 号）第三十条第四项写明，学校可予退学处理的情形之一是「未经批准连续两周未参加学校规定的教学活动的」。这条规定适用于本科、专科（高职）和研究生，2022 年修订后继续有效。\n- 证据等级：A\n- 来源：《普通高等学校学生管理规定》（2017 年 2 月 4 日中华人民共和国教育部令第 41 号公布，自 2017 年 9 月 1 日起施行）第三十条。<https://www.moe.gov.cn/jyb_xxgk/xxgk/zhengce/guizhang/202112/t20211206_585064.html>\n- 备注：这条列在最前面，是因为它是这一节里唯一一条后果最重、成本最低的。注意「未经批准」四个字：请了假并获批就不算。各校的具体请假流程写在自己的学生手册里，开学那本小册子至少翻到这一页。\n\n### 2. 不能上课就事先请假并拿到批准，别指望「老师不认识我」\n\n<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=中 口径=学业 -->\n\n- 成本：一次请假花 10 分钟。\n- 说人话：请假要事先办、要有批准。事后补一句「我那天不舒服」不算。老师记不记得你不重要，教务系统记得你。\n- 收益：同一规定的第十九条写明，学生应当按时参加教育教学计划规定的活动；不能按时参加的，应当事先请假并获得批准；无故缺席的，根据学校有关规定给予批评教育，情节严重的给予相应纪律处分。缺勤记录会进入学籍档案，影响评奖、评优和推优。\n- 证据等级：A\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第十九条。同上。\n- 备注：给 A 是因为这是明文规定、不是研究结论。注意这条和上一条是阶梯关系：请假并获批 → 无事；无故缺席 → 批评教育到纪律处分；连续两周未经批准不参加 → 可退学。部分高职院校对实训课、见习课有更严的单独规定，以本校学生手册为准。\n\n### 3. 上自习和上课时，把手机放到手够不到的地方\n\n<!-- 成本标签: 钱=0 时间=0 毅力=些 收益=中 口径=学业 -->\n\n- 成本：不花钱。每次坐下多花 5 秒把手机放进包里或抽屉里。\n- 说人话：手机只要在你旁边的桌上、哪怕关着机、哪怕你没碰它，你的脑子就有一部分在替它值班，做题和听课的效率会掉。带走或者塞进包里，是这一节里最便宜的改动。\n- 收益：Ward 等人做了一组实验，把「手机放在桌上」「手机放包里」「手机放另一个房间」三种情况对比，结果是手机离得越远，可用的认知容量越高，差异在需要持续注意的任务上显著。这项研究被反复引用，但样本是大学生、单次实验室实验，不是长期成绩追踪。\n- 证据等级：B\n- 来源：Ward AF, Duke K, Gneezy A, Bos MW (2017). Brain Drain: The Mere Presence of One's Own Smartphone Reduces Available Cognitive Capacity. Journal of the Association for Consumer Research, 2(2), 140–154. <https://doi.org/10.1086/691462>\n- 备注：给 B 的原因：这是实验室研究，测的是当次任务的认知容量，不是一学期后的成绩或绩点。它证明的是「手机在场有害」这一点，不是「把手机放远能提高绩点」这个更大的结论。另外要注意这个领域的复现情况并不一致，B 已经给到顶了，不给 A。\n\n### 4. 上课不用逐字抄，用自己的一句话记下老师强调的点\n\n<!-- 成本标签: 钱=0 时间=0 毅力=些 收益=中 口径=学业 -->\n\n- 成本：不花钱。换一种记法而已。\n- 说人话：把老师说的话一句句抄下来，你上课时手在动、脑子其实是关着的。改成「用自己的话写一句这页讲了什么」，效果更好。但要注意：网上流传的「手写一定比打字好」，后来被多次重复实验推翻了。\n- 收益：把材料用自己的话重新组织，属于「自我解释」和「精细提问」，在 Dunlosky 等人对 10 种学习方法的评级里属于中等效用。而「手写 vs 用笔记本电脑记笔记」这条具体结论争议很大：Mueller 和 Oppenheimer 2014 年的研究发现手写组在概念性问题上更好，但后续的多次重复实验（如 Urry 等 2021 年）没能复现出这个差异。\n- 证据等级：C\n- 来源：Mueller PA, Oppenheimer DM (2014). The Pen Is Mightier Than the Keyboard: Advantages of Longhand Over Laptop Note Taking. Psychological Science, 25(6), 1159–1168. <https://doi.org/10.1177/0956797614524581> ; Urry HL 等 (2021). Don't Ditch the Laptop Just Yet: A Direct Replication of Mueller and Oppenheimer's (2014) Study. Psychological Science, 32(6), 823–837. <https://doi.org/10.1177/0956797620965541> ; Dunlosky J 等 (2013). Improving Students' Learning With Effective Learning Techniques. Psychological Science in the Public Interest, 14(1), 4–58. <https://doi.org/10.1177/1529100612453266>\n- 备注：给 C 的原因：这一条拆开有两层。「用自己话概括」有中等强度的证据；「手写比打字好」这个流行的说法在直接重复实验里没站住。所以这一条只写到「用自己的话记」，不写「必须手写」。把有争议的结论写成确定结论，是这一节最容易犯的错。\n\n### 5. 至少要有一门课，你坐在前排并且老师认得出你\n\n<!-- 成本标签: 钱=0 时间=少 毅力=些 收益=中 口径=学业 -->\n\n- 成本：不花钱。换一个座位而已。\n- 说人话：让至少一位老师记住你的脸和名字。不是为了讨好谁，是为了在你卡住的时候有一个可以直接开口问的人。一个能随时问的人，比一堆存下来的课件有用。\n- 收益：没有能直接量化这条收益的研究。它的作用机制是提高你获得即时反馈的概率，而「有反馈的练习」在多项研究里都被列为练习测试有效的关键调节因素（Donoghue 和 Hattie 的元分析把「有没有反馈」列为重要调节变量）。\n- 证据等级：D\n- 来源：Donoghue GM, Hattie JAC (2021). A Meta-Analysis of Ten Learning Techniques. Frontiers in Education, 6:581216. <https://doi.org/10.3389/feduc.2021.581216>（仅用于说明「反馈」是有效学习的调节因素，本条主张本身无直接研究）\n- 备注：给 D 的原因：没有研究比较过「坐前排的学生」和「坐后排的学生」的长期成绩，做这种研究也没法排除自选择——愿意坐前排的人本来就更投入。所以这条只能靠机制推。写出来是因为它成本近乎为零、方向不会错，但你要知道它不是证据。\n\n### 6. 课上卡住就当场举手问，别攒到考前一起问\n\n<!-- 成本标签: 钱=0 时间=少 毅力=些 收益=中 口径=学业 -->\n\n- 成本：一次开口，几秒钟的尴尬。\n- 说人话：不懂的地方当场问掉，是最省时间的做法。攒到期末考试前两周，你要补的不是一个点，是一整条链子。\n- 收益：没有直接量化「当场提问」收益的研究。可类比的是「及时反馈」在练习测试中的作用——延迟反馈的效果弱于即时反馈，这是元分析里的常见调节变量结论。具体到「课堂提问」这个行为本身，没有对照研究。\n- 证据等级：D\n- 来源：同第 5 条（Donoghue & Hattie 2021，仅作为机制参考）。\n- 备注：给 D 的原因同第 5 条。补充一点：这条对不少学生真正的障碍不是不知道，是怕。如果你的问题确实是「不敢举手」，那你要解决的是心理问题，不是学习问题，可以看第 10 节第 8 条。\n\n### 7. 公共课和通识课是绩点里最便宜的分，别把它当水课\n\n<!-- 成本标签: 钱=0 时间=少 毅力=些 收益=中 口径=学业 -->\n\n- 成本：每门课每周多花 1 到 2 小时。\n- 说人话：专业课你多花一倍时间可能只多考十分，公共课多花两小时可能直接从 70 分跳到 90 分。绩点是按学分加权的，而公共课的学分往往不比专业课少。这是投入产出比最高的位置。\n- 收益：没有研究直接比较过「在公共课上加投入」和「在专业课上加投入」的绩点回报。理论依据是学分加权的绩点计算公式（GPA = Σ(课程绩点 × 学分) / Σ学分）——在低难度课程上提高一档分数，对总绩点的贡献与在高难度课程上提高一档相同，但难度更低。\n- 证据等级：D\n- 来源：计算方法依各校学籍管理规定，无统一国家级文件；本条无实验或观察性研究支持。\n- 备注：给 D 的原因：这是从绩点计算公式直接推出来的算术结论，不是研究结论。之所以仍然写，是因为它只依赖公式、不依赖任何假设。但要提醒一句：如果你们学校有「专业核心课不及格不能毕业」「推优只看专业课排名」这类规定，这个算术就不成立了，先查清本校规则。\n\n### 8. 上网课时也要坐起来，别躺在床上听\n\n<!-- 成本标签: 钱=0 时间=0 毅力=些 收益=小 口径=学业 -->\n\n- 成本：不花钱。换个地方坐着。\n- 说人话：躺着听网课，你的大脑会把这件事归类成休息，二十几分钟后就会睡着或者开始刷手机。坐起来、开着摄像头、把课本摊开，这三个动作不需要花钱，但能决定这节课算不算数。\n- 收益：没有直接研究比较过「躺床上听网课」和「坐着听网课」的学习效果。间接依据是「躺着」是睡眠环境线索，会降低唤醒水平。\n- 证据等级：D\n- 来源：无。没有找到直接研究，本条不给文献。\n- 备注：给 D 的原因：找不到研究，且很可能不会有。本条是常识，写出来是因为成本为零。如果你对「没有证据的东西该不该写进书里」有疑问，这一条就是这本人指南里 D 级的典型样子：**承认它是常识，不假装它是结论**。\n","02-复习考试与绩点.md":"# 第 2 节 复习、考试与绩点\n\n**口径**：时间（每周几小时）／学业（绩点、分数）／安全（学籍）\n\n本节是全书证据最硬的一节。原因很简单：学习方法的有效性可以直接做实验，而「该不该进学生会」不能。\n\n---\n\n### 1. 复习的主要动作是合上书自己考一遍，不是再读一遍\n\n<!-- 成本标签: 钱=0 时间=少 毅力=些 收益=大 口径=学业 -->\n\n- 成本：不花钱。同样的时间换一种用法。\n- 说人话：最有用的复习方式，是把书合上、把答案捂住，自己把内容复述或写出来，写不出来再翻书。反复重读之所以感觉有用，是因为它让你「读着很顺」，这种顺滑感会被大脑误认为「我已经会了」。等一周后再考，这个错觉就露馅了。\n- 收益：Roediger 和 Karpicke 做了一组对照实验：学同一篇文章，一组反复重读，一组做自我测试。学完 5 分钟后考，重读组 81%、自测组 75%，重读组略胜；一周后再考，自测组 56%、重读组 42%，自测组高出 14 个百分点。Dunlosky 等人对 10 种学习方法的系统评价里，练习测试（practice testing）是仅有的两种被评为「高效用」的方法之一。Donoghue 和 Hattie 的元分析纳入 242 项研究、1619 个效应量、169,179 名被试，10 种方法的平均效应量为 0.56，其中分散练习和练习测试最高。\n- 证据等级：A\n- 来源：Roediger HL, Karpicke JD (2006). Test-Enhanced Learning: Taking Memory Tests Improves Long-Term Retention. Psychological Science, 17(3), 249–255. <https://doi.org/10.1111/j.1467-9280.2006.01693.x> ; Dunlosky J, Rawson KA, Marsh EJ, Nathan MJ, Willingham DT (2013). Improving Students' Learning With Effective Learning Techniques. Psychological Science in the Public Interest, 14(1), 4–58. <https://doi.org/10.1177/1529100612453266> ; Donoghue GM, Hattie JAC (2021). A Meta-Analysis of Ten Learning Techniques. Frontiers in Education, 6:581216. <https://doi.org/10.3389/feduc.2021.581216>\n- 备注：这是整本书证据最硬的一条。要注意「自测」不只指做选择题，也包括关上课本默写、口头讲给自己听、做往届真题。另外提醒一句：Dunlosky 那篇综述自己说，纳入的研究大多考的是「记住事实」这类表面结果，对「深层理解」的推广要谨慎。\n\n### 2. 同样的小时数，摊到几天里，比一天全用完强\n\n<!-- 成本标签: 钱=0 时间=0 毅力=些 收益=大 口径=学业 -->\n\n- 成本：不花钱，也不多花时间。只是把同样的时长摊开。\n- 说人话：6 小时的复习分成 3 天各 2 小时，比连续 6 小时效果好。关键不在总量，在间隔。\n- 收益：Dunlosky 等人评为「高效用」的另一种方法就是分散练习（distributed practice）。Cepeda 等人的研究显示，在最优间隔下，分散学习相比集中学习的记忆保持量提升可达约 150%。Donoghue 和 Hattie 的元分析同样把分散练习列为效应量最高的两种之一。\n- 证据等级：A\n- 来源：Cepeda NJ, Pashler H, Vul E, Wixted JT, Rohrer D (2006). Distributed Practice in Verbal Recall Tasks: A Review and Quantitative Synthesis. Psychological Bulletin, 132(3), 354–380. <https://doi.org/10.1037/0033-2909.132.3.354> ; Dunlosky J 等 (2013)，同第 1 条。\n- 备注：那个「150%」是在实验室里挑出的最优间隔下测到的，不是说你随便摊开就能涨 150%。实操上比数字更重要的是这条规则：**复习间隔要接近你打算记住它的时长**——考完就忘的课，隔一两天就够；要撑到专升本考试或者考研的内容，间隔要拉到周和月。\n\n### 3. 划重点、反复看、抄摘要，这三种最流行的学法排在最后\n\n<!-- 成本标签: 钱=0 时间=大 毅力=否 收益=负 口径=时间 -->\n\n- 成本：这三种方法花的时间很多——按 Dunlosky 的评价，重读的时间成本是「高」，而回报在递减。\n- 说人话：荧光笔划得越漂亮，你越可能以为自己会了。这三种方法不是「有点用」，是在同样时间里**排在最后一档**。你用两小时划重点，用同样两小时自测，前者拿不到后者一半的效果。\n- 收益：Dunlosky 等人把 10 种方法分为高、中、低三档：高效用只有练习测试和分散练习两种；低效用的五种是摘要、划重点/划线、关键词记忆法、想象法、重读。Karpicke 等人调查了 177 名大学生，84% 的人把重读列为自己的学习策略、55% 把它排在第一位，而只有约 11% 的人会自我测试——使用频率最高的方法恰好是效果最差的方法。研究者把这个现象叫「流畅性错觉」（fluency illusion）。\n- 证据等级：A\n- 来源：Dunlosky J 等 (2013)，同第 1 条 ; Karpicke JD, Butler AC, Roediger HL (2009). Metacognitive strategies in student learning: Do students practise retrieval when they study on their own? Memory, 17(4), 471–479. <https://doi.org/10.1080/09658210802647009>\n- 备注：注意「低效用」不等于「完全没用」——它的意思是同等时间里回报最低。第一次读材料时顺手划两笔可以帮助定位，问题是很多人把划重点当成了主要学法。那 84%、55%、11% 三个数是 2009 年一项 177 人的问卷，样本不大，但后续研究结论一致，所以给 A。\n\n### 4. 几种题型混着练，别一种连做二十道\n\n<!-- 成本标签: 钱=0 时间=0 毅力=些 收益=中 口径=学业 -->\n\n- 成本：不花钱。换一种做题顺序。\n- 说人话：一章一练刷得又顺又爽，但那是因为你提前知道该用哪个公式。把不同类型混在一起练，你会做错更多、感觉更差，但考试时认得出「这题该用哪招」。这种「练的时候更难受、考的时候更好」，是学习里最常见的反直觉现象。\n- 收益：Dunlosky 等人把交错练习（interleaved practice）评为中等效用。Rohrer 等人做的数学练习实验中，交错组在延后测试里的正确率 72%，分块组 38%，效应量 d = 1.05。\n- 证据等级：A\n- 来源：Rohrer D, Dedrick RF, Stershic S (2015). Interleaved Practice Improves Mathematics Learning. Journal of Educational Psychology, 107(3), 900–908. <https://doi.org/10.1037/edu0000001> ; Dunlosky J 等 (2013)，同第 1 条。\n- 备注：给 A 是因为有随机分组实验和明确效应量，但适用范围要说清：交错练习的证据主要来自数学、物理这类「需要判断用哪个方法」的科目。纯记忆类内容（比如背中药性味归经）用交错练习的收益弱得多，那种内容更适合直接用分散练习加自测。第一次学新内容时，先分块学明白再交错练，效果更好。\n\n### 5. 别按「我是视觉型 / 听觉型」挑学习方法\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=时间 -->\n\n- 成本：不花钱。少买一门「学习风格测评」课程。\n- 说人话：「你是视觉型所以要画思维导图」这个说法没有证据支持。真正有证据的是「按内容选形式」：讲流程的用图，讲概念的用文字，讲计算的用例题。跟你是什么「型」没关系。\n- 收益：Pashler 等人系统检索了支持「学习风格匹配教学」的文献，结论是几乎没有设计严谨的研究能证明「按学生自称的学习风格进行教学能提高成绩」。他们指出，要证明这个说法，需要做交叉设计实验（视觉型用视觉教、视觉型用听觉教、听觉型用视觉教、听觉型用听觉教四种组合都测一遍），而这类实验基本没做过。\n- 证据等级：A\n- 来源：Pashler H, McDaniel M, Rohrer D, Bjork R (2008). Learning Styles: Concepts and Evidence. Psychological Science in the Public Interest, 9(3), 105–119. <https://doi.org/10.1111/j.1539-6053.2009.01038.x>\n- 备注：这是「证明某件事不存在」的证据，所以给 A 的理由和别处不同——不是有量化收益，而是有权威的系统性否定。注意区分两件事：**每个人有自己偏好的学习形式**（这是真的，但偏好不等于效果）；**按偏好学习效果更好**（这是假的）。原书作者后来也补了一句：学习风格理论在教师培训里流传极广，恰恰说明这个说法有多难被纠正。\n\n### 6. 要背的内容，按「将来会怎么考」出题给自己，别原样背一遍\n\n<!-- 成本标签: 钱=0 时间=少 毅力=些 收益=中 口径=学业 -->\n\n- 成本：出题比背诵多花一点准备时间。\n- 说人话：如果期末是名词解释，你就合上书默写名词解释；如果是案例分析，你就自己编案例。按最终要用的形式练，才叫练。\n- 收益：练习测试的效应「不论题型都成立」，而且即使练习的题型和最终考试的题型不一致，效果依然存在——这是 Dunlosky 等人综述里明确写的一点。此外，「生成效应」表明自己出题、自己写答案比读别人写好的答案更有效。\n- 证据等级：A\n- 来源：Dunlosky J 等 (2013)，同第 1 条 ; Roediger HL, Karpicke JD (2006)，同第 1 条。\n- 备注：这条是第 1 条的操作版本。之所以单列，是因为「自测」最容易被执行成「把笔记再读一遍然后点头」。\n\n### 7. 考试作弊这件事，算的不是分数账，是学籍账\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=负 口径=安全 -->\n\n- 成本：不省钱不省时间，省的是「本该用来复习的时间」。代价是学籍。\n- 说人话：作弊被抓，那门课成绩记为零分、无效，还要给纪律处分；已经拿到的学历证书、学位证书，学校可以依法撤销。这不是「补考一下」的量级。\n- 收益：《普通高等学校学生管理规定》第十八条规定，学生严重违反考核纪律或者作弊的，该课程考核成绩记为无效，并视情节给予相应纪律处分。第三十七条规定，对以作弊、剽窃、抄袭等学术不端行为或者其他不正当手段获得学历证书、学位证书的，学校应当依法予以撤销。另据第四节相关条款，3 年内有代替他人参加机动车驾驶人考试行为的不得申请驾驶证——代考的痕迹是跨系统留存的。\n- 证据等级：A\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第十八条、第三十七条。<https://www.moe.gov.cn/jyb_xxgk/xxgk/zhengce/guizhang/202112/t20211206_585064.html> ; 《机动车驾驶证申领和使用规定》（公安部令第 162 号）第十五条第十二项。\n- 备注：第十八条里有一个容易被忽略的缓冲：给予警告、严重警告、记过及留校察看处分的，经教育表现较好，可以对该课程给予补考或者重修机会。也就是说，处分和补救是两件事。但这不改变「成绩记为无效」这个起点。\n\n### 8. 挂科之后第一件事是查本校的重修和补考规则，不是自责\n\n<!-- 成本标签: 钱=少 时间=中 毅力=否 收益=大 口径=学业 -->\n\n- 成本：重修可能要交重修费，各校标准不同。时间上多占一个学期的几节课。\n- 说人话：挂了就挂了，先去看学生手册里三件事——这门课能不能补考、补考不过能不能重修、重修成绩在成绩单上怎么标注。这三件事决定了后果的大小，而它们都写在明文里，不用猜。\n- 收益：《普通高等学校学生管理规定》第十三条规定，考核不合格的课程是否重修或者补考，由学校规定；第十八条规定，学校对通过补考、重修获得的成绩应当予以标注。也就是说，补救路径是存在的，但会被标注——这一点你必须提前知道，因为它会影响专升本和部分单位的成绩审核。\n- 证据等级：A\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第十三条、第十八条。\n- 备注：给 A 的理由同前：这是明文规定。「予以标注」这四个字很关键——不少学生以为重修考个高分就能抹掉记录，实际上成绩单会显示这是补考或重修成绩。所以最优解永远是第一次就过。\n","03-四六级与英语.md":"# 第 3 节 四六级与英语\n\n**口径**：时间（备考小时）／钱（报名费、培训班）／学业（学分免修、毕业要求）／就业（简历门槛）\n\n这一节的信息差特别大。据教育部教育考试院的公开口径，四六级只面向全日制在校生——也就是说，**这件事一辈子只有在校这几年能做，毕业之后没有任何补救通道**。它因此是全书里「过期不候」性质最强的一项。\n\n---\n\n### 1. 四六级只对全日制在校生开放，毕业之后没有补考通道\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=大 口径=就业 -->\n\n- 成本：不花钱、不花时间。花二十分钟读一遍规则。\n- 说人话：CET 笔试的报考者限定为全日制普通及成人高等院校本科、专科在校生和在籍研究生。已经毕业的、在职社会人员都不在范围内。网上所有「社会考生通道」「代报名」都是违规挂靠学籍，既保不住资格，又可能泄露个人信息。也就是说：你在校期间没考，之后就没有合法途径再考。\n- 收益：各省教育考试院发布的报名通知均采用同一表述：「CET 报考者应为全日制普通及成人高等院校本科、专科在校生，在籍研究生」。\n- 路径：本科与专科（高职）在校生同权，都在报考范围内；两者唯一的差别是报六级要先过四级 425 分。高职学生不要因为「以为专科不能考」而放弃——这是本节最常被误传的一条。\n- 证据等级：A\n- 来源：黑龙江省招生考试院《黑龙江省 2025 年下半年全国大学英语四、六级考试报名即将开始》。<https://hlj.gov.cn/hlj/c107857/202509/c00_31870438.shtml> ; 全国大学英语四、六级考试官方网站项目介绍。<https://cet.neea.edu.cn/>\n- 备注：给 A 是因为这是各省级考试院统一表述的报考资格规定。这条需要特别写给两类人看：一是觉得「反正以后还能考」一直拖的人；二是以为专科生不能考的人——**专科在校生明确在报考范围内，和本科生同权**，唯一的差别是报六级要先过四级。\n\n### 2. 六级要先过四级 425 分，但 425 不是「及格线」\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=学业 -->\n\n- 成本：不花钱、不花时间。\n- 说人话：修完大学英语四级课程的可报四级；报六级要四级成绩达到 425 分及以上。但四六级满分 710，采用常模参照评分，官方从来没设过及格线。425 分只是报名六级的门槛数，不是「合格」。所以别把「过 425」当成终点，很多单位看的是分数。\n- 收益：官方报名通知的表述是「修完大学英语六级课程且英语四级成绩达到 425 分及以上的学生可报考英语六级」；四六级满分 710 分，无官方及格线。\n- 证据等级：A（425 门槛）/ C（「无及格线」这一点的公开说明）\n- 来源：同上（黑龙江、大同市招生考试中心报名通知）。「无官方及格线」的说法见于对教育部教育考试院规则的公开解读，未找到考试院就该问题发布的独立文件。\n- 备注：给两个等级是因为这两句话的证据质量不同。「425 可报六级」是报名文件原文，A；「没有及格线」是长期一致的公开规则说明，但没有一份标题就叫《关于及格线的说明》的文件，所以降为 C。写这条是为了防止一个很常见的误判：有人以为自己「差几分没及格」，其实只是差几分没到六级门槛。\n\n### 3. 只能在本校考点报名，不能跨校考\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=学业 -->\n\n- 成本：不花钱。查一次本校教务处通知。\n- 说人话：考试实行本校考点原则，你只能在学籍所在院校报名和考试。如果本校没设考点，你这一年就报不了——这不是你操作的问题，是学校的问题。另外很多学校考位紧张，且对大一上学期报考有额外门槛（比如按高考英语成绩划定）。**报名窗口通常只有十几天，错过就没有下一次。**\n- 收益：官方规则为「考生须在本校考点报名并参加考试」；口语考生应在笔试考点报考，不得跨校报考。部分院校对大一新生报考设置高考英语成绩门槛，考位分配存在优先级规则，具体以本校教务处公告为准。\n- 证据等级：A（本校考点原则）/ D（考位优先级、新生门槛的具体做法）\n- 来源：大同市人民政府门户网站《大学英语四六级考试明起开始报名》。<https://dt.gov.cn/dtszf/bmdt/202603/f17afe89bf534690ae60010316139416.shtml> ; 各校教务处通知（考位规则为各校自定，无统一文件）。\n- 备注：给 D 的那半句是各校自定规则，写进去只是提醒你「先去查本校通知」。这条最实用的动作是：开学第一周就把本校教务处的四六级通知找出来，看清楚报名时间、有没有新生限制、考点在哪，然后设一个手机日历提醒。\n\n### 4. 2026 年起不再发纸质成绩单，考完 10 个工作日就把电子版存好\n\n<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=中 口径=就业 -->\n\n- 成本：不花钱。下载加存档花 5 分钟。\n- 说人话：从 2026 年上半年考试起，四六级不再印发纸质成绩报告单。成绩发布 10 个工作日后，到中国教育考试网下载电子版，电子版与原纸质版同等效力。这件事的坑在于：以后调取历史成绩要登录同一账号，账号丢了会很麻烦。**考完立刻下载、改名、存进云盘。**\n- 收益：官方口径为「自 2026 年上半年考试起，CET 将不再印发纸质成绩报告单。成绩发布 10 个工作日后，考生可登录中国教育考试网查看并下载电子成绩报告单，电子成绩报告单与原纸质成绩报告单具有同等效力。」\n- 证据等级：A\n- 来源：大同市人民政府门户网站《大学英语四六级考试明起开始报名》，引市招生考试中心信息。<https://dt.gov.cn/dtszf/bmdt/202603/f17afe89bf534690ae60010316139416.shtml>\n- 备注：这是一个刚发生的变化，网上还大量流传着「记得勾选纸质成绩单」的旧攻略，已经不适用了。按官方说法，报名时不用再选纸质单。\n\n### 5. 背单词用间隔重复加自测，别一天刷 300 个新词\n\n<!-- 成本标签: 钱=0 时间=中 毅力=是 收益=大 口径=时间 -->\n\n- 成本：不花钱（用免费的记忆卡片工具即可）。每天 20 到 40 分钟，坚持到考试。\n- 说人话：一天新刷 300 个词、第二天全忘，是最典型的低效做法。正确做法是每天新词控制在几十个，然后把大头时间用来复习前几天学过的、并且**自我测试**（看英文想中文、看中文想英文，而不是看着单词表「眼熟」）。同一批单词要在隔一天、隔三天、隔一周时各测一次。\n- 收益：Dunlosky 等人对 10 种学习方法的评价中，练习测试和分散练习是仅有的两种「高效用」方法；Donoghue 和 Hattie 的元分析（242 项研究、169,179 名被试）也把这两种列为效应量最高。Cepeda 等人的研究显示最优间隔下分散学习相对集中学习的保持量提升可达约 150%。注意：同属 Dunlosky 评价体系的「关键词记忆法」被列为低效用——即「用一个谐音记住单词」这类技巧，效果远不如直接反复测试。\n- 证据等级：A\n- 来源：Cepeda NJ 等 (2006). Psychological Bulletin, 132(3), 354–380. <https://doi.org/10.1037/0033-2909.132.3.354> ; Dunlosky J 等 (2013). Psychological Science in the Public Interest, 14(1), 4–58. <https://doi.org/10.1177/1529100612453266> ; Donoghue GM, Hattie JAC (2021). Frontiers in Education, 6:581216. <https://doi.org/10.3389/feduc.2021.581216>\n- 备注：给 A 是因为这是全书证据最扎实的一类结论，且有明确的可操作形式。要说明的是：这些实验测的是「记住」，不是「考研英语能考多少分」。所以这一条能保证你不把时间浪费掉，不保证你考高分——高分还需要听力、阅读、写作的专门训练，而那部分没有同等强度的证据，本书不硬给结论。\n\n### 6. 报名了就去考，别把考位当彩排\n\n<!-- 成本标签: 钱=少 时间=少 毅力=否 收益=中 口径=学业 -->\n\n- 成本：一次报名费，各省标准不同。以黑龙江省 2025 年下半年为例，四级 35 元/科次、六级 37 元/科次、口试 50 元/科次。\n- 说人话：缺考不只是零分。官方没有统一处罚，但相当一部分高校在自己的校规里对无故缺考有约束（比如限制下一次报名）。你家学校有没有这规矩，报名之前查一次。另外报名费不退，报名了不去考，等于既浪费钱又可能浪费下一次机会。\n- 收益：报名费标准以省级考试院通知为准（黑龙江：CET4 35 元、CET6 37 元、CET-SET 50 元）。缺考后果方面，官方不设统一处罚，但据公开解读约三成高校在校规中设置了限制，具体以本校教务处公告为准。\n- 证据等级：A（报名费）/ C（缺考比例与校规约束）\n- 来源：黑龙江省招生考试院报名通知。<https://hlj.gov.cn/hlj/c107857/202509/c00_31870438.shtml> ; 「约三成高校有校规限制」的说法来自对 2026 年报考规则的公开整理，非官方统计，**属于待核实项**。\n- 备注：把「约三成」标为待核实，是因为没找到这份统计的原始调查。写出来只是让你知道「缺考有代价」这件事存在，具体数字不要引。报名费各省差异不小，以本省考试院当年通知为准，别照抄黑龙江的数。\n\n### 7. 想刷分，先问清楚「要多少分」而不是先报名\n\n<!-- 成本标签: 钱=少 时间=中 毅力=些 收益=中 口径=时间 -->\n\n- 成本：一次报名费，加一轮备考时间。\n- 说人话：每年都有大量学生「因为分低所以再考一次」，但说不清低在哪。刷分之前先查三件事：你们学校专升本或毕业对四六级有没有分数要求；你目标单位或目标院校的招聘/招生简章写的是多少分；你现在这个分和它的差距值不值一轮备考。查完再决定。\n- 收益：没有研究测过「刷分」的净收益。可用的算术是：每多考一次的成本 = 报名费 + 一轮备考小时数；收益 = 达到某个明确门槛或提高竞争力。门槛各校各单位不同，必须自己去查。\n- 证据等级：D\n- 来源：无直接研究。门槛要求见各校专升本政策与各单位招聘公告。\n- 备注：给 D 的原因：这是一道只能自己填数的题，本书给不了数。之所以写，是因为「盲目刷分」是这一节里最常见的无效时间支出——它的成本（整个备考周期）远高于它的收益（通常只是简历上一个没人设门槛的分数）。\n\n### 8. 成绩长期可查，但别指望「两年有效」这种说法帮你免责\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=小 口径=就业 -->\n\n- 成本：不花钱。\n- 说人话：网上流传「四六级成绩两年有效，过期要重考」，这个说法与官方规则不符——官方从未设定有效期，历次成绩永久保存在数据库中可查。每考一次的成绩独立存档，新成绩不会覆盖旧成绩，你提交材料时可以自己挑最满意的那一次。但从反面说：也正因为长期可查，早些年的低分记录并不会消失。\n- 收益：官方规则为成绩自发布起长期可查，无失效年限；历次考试成绩独立存档，不存在新成绩覆盖旧成绩的机制。部分单位在招聘中自设「近五年」等时效要求，属于用人单位的自主条件，不是考试的规则。\n- 证据等级：C\n- 来源：对教育部教育考试院四六级规则的公开解读（含缺考、成绩存档、有效期等常见问题的辟谣整理）。<https://cet4-6.xdf.cn/202609/15402020.html> ; 官方成绩查询入口 <https://cet.neea.edu.cn/>\n- 备注：给 C 的原因：结论方向一致、多年无争议，但我没找到考试院就此发布的独立文件，来源是培训机构的规则梳理。所以这一条按「公开一致的说法」处理，不当硬证据用。真正的操作建议只有一句：**每次考完都下载电子成绩单存档**，账号和文件都别丢。\n","04-考证竞赛与技能.md":"# 第 4 节 考证、竞赛与技能\n\n**口径**：时间（备考小时）／钱（报名费、培训费）／就业（长期收入）／学业（学分、专升本加分）\n\n这一节的原型来自《高性价比人生指南》第 23 节「学什么技能划算」，但口径改了：原书算的是成年人的收入回报，这里要算的是**在校生的时间回报**——你花 200 小时考的这本证，到底换回什么。\n\n---\n\n### 1. 花钱考证之前，先查这本证在不在《国家职业资格目录》里\n\n<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=大 口径=就业 -->\n\n- 成本：不花钱。查一次目录花十分钟。\n- 说人话：国家有一本《国家职业资格目录》，2021 年版一共 72 项职业资格——专业技术人员 59 项（其中准入类 33 项、水平评价类 26 项），技能人员 13 项。你要考的证如果不在目录里，它就不是「国家职业资格」。这个动作十分钟，能省掉几千块培训费。\n- 收益：人力资源和社会保障部 2021 年 12 月公布的《国家职业资格目录（2021 年版）》共计 72 项职业资格。同次调整中，职业资格总数比 2017 年版减少 68 项，削减 49%。\n- 证据等级：A\n- 来源：人力资源社会保障部《人力资源社会保障部公布 2021 年版〈国家职业资格目录〉》。<https://www.mohrss.gov.cn/wap/xw/rsxw/202112/t20211202_429340.html>\n- 备注：给 A 是因为这是国务院同意、人社部公布的正式目录。目录实行「动态调整」，所以你看到的是 2021 年版这件事本身也要留意——查的时候以人社部官网最新公告为准，别用第三方网站上几年前的截图。\n\n### 2. 「目录之外一律不得许可和认定职业资格」——看到「国际认证」先按住钱包\n\n<!-- 成本标签: 钱=大 时间=中 毅力=否 收益=大 口径=钱 -->\n\n- 成本：不花钱。省下的是一笔培训费。\n- 说人话：政策原话是「目录之外一律不得许可和认定职业资格，目录之内除准入类职业资格外一律不得与就业创业挂钩」。翻译一下：任何不在目录里的「职业资格证书」，国家不承认它是资格。市面上大量「国际XX协会认证」「行业高级人才认证」，宣传里都刻意避开「国家」两个字，就是钻这个空子。\n- 收益：人社部在 2021 年版目录答记者问中明确：「目录之外一律不得许可和认定职业资格，目录之内除准入类职业资格外一律不得与就业创业挂钩，减轻了人才的负担，就业灵活度进一步增强。职业资格过多过滥导致的违规培训发证等现象也会得到显著遏制。」此外，人社部门已退出技能人员职业资格具体实施工作。\n- 证据等级：A\n- 来源：人力资源社会保障部有关司局负责同志就公布《国家职业资格目录（2021 年版）》答记者问。<https://chinajob.mohrss.gov.cn/c/2021-12-03/333833.shtml>\n- 备注：给 A 是因为引的是一句政策原文。要补充的是：不在目录里**不等于完全没用**——有些企业内部确实认某些认证作为招聘参考。但那种情况下决定价值的是那家企业的招聘公告，不是证书封面上的字。判断方法就一句：去你要去的单位今年的招聘公告里搜这个证的名字，搜到就是有用，搜不到就是没用。\n\n### 3. 分清「准入类」和「水平评价类」：只有准入类是「没证不能干」\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=大 口径=就业 -->\n\n- 成本：不花钱。看一眼证书或目录上的分类。\n- 说人话：准入类职业资格，是没有它就不能从事这个职业（比如特种作业人员、道路运输从业人员、特种设备安全管理和作业人员）。水平评价类只是评级，没证也能干，证只影响你在行业里的位置。这两类的考证优先级差一个量级，别混着算。\n- 收益：2021 年版目录中，准入类职业资格关系公共利益或涉及国家安全、公共安全、人身健康、生命财产安全，均有法律法规或国务院决定作为依据。本次调整新增了「危险货物、化学品运输从业人员」「道路运输从业人员」「特种作业人员」「建筑施工特种作业人员」「特种设备安全管理和作业人员」等准入类技能人员职业资格。同时，除与公共安全、人身健康等密切相关的职业工种外，73 项水平评价类技能人员职业资格已全部退出目录。\n- 证据等级：A\n- 来源：人力资源社会保障部公布 2021 年版《国家职业资格目录》，同第 1 条。\n- 备注：**这一节最值得记住的操作规则是这句**：先问「没这个证我能不能干这件事」。答「不能」→ 准入类 → 优先考，因为它是硬门槛。答「能，但有证更有竞争力」→ 水平评价类 → 放后面，先干起来再说。很多学生把顺序搞反了，花了大力气考水平评价类，结果卡在真正的准入门槛上。\n\n### 4. 培训机构说「考个证能领补贴」——在校生基本领不到那笔技能提升补贴\n\n<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=中 口径=钱 -->\n\n- 成本：不花钱。查一次政策原文。\n- 说人话：「考证领补贴」这句话被广泛用于招生宣传，但主流的技能提升补贴有硬前提：**依法参加失业保险、累计缴纳失业保险费 12 个月以上**的在职职工，或正在领取失业保险金的人员。在校生没有缴过失业保险，不符合这个前提。所以别把补贴算进你的考证收益里。\n- 收益：以《人力资源社会保障部 教育部 财政部 国家税务总局关于失业保险支持企业稳岗扩岗的通知》为依据的技能提升补贴，补贴对象为「依法参加失业保险，累计缴纳失业保险费 12 个月以上的企业在职职工或领取失业保险金人员」，且要求证书在 12 个月内申请，逾期不予办理。在校生不满足该前提。\n- 证据等级：A\n- 来源：溆浦县促进高质量充分创业就业政策清单（引人社部发〔2026〕39 号及湘人社规〔2026〕13 号）。<https://www.xp.gov.cn/xp/c110249/202609/2ee84c0c4066461091a685ae49cccd39.shtml>\n- 备注：为什么以地方清单为来源：地方清单把国家级文件的条件逐条抄清楚了，便于核对。但要注意政策有例外——部分地区在「职业技能提升行动」期间对贫困家庭学生、高校毕业生有专门的免费培训或培训补贴，前提条件不同、由地方自定。所以准确说法是：**默认领不到，但要花十分钟查一下本地有没有面向在校生的专项培训补贴**。另外，能领的是「一次性求职补贴」（见下一条），不是「技能提升补贴」，这两个别混。\n\n### 5. 报完名就上「技能人才评价证书全国联网查询系统」核一下能不能查到\n\n<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=中 口径=就业 -->\n\n- 成本：不花钱。查一条几分钟。\n- 说人话：证书能不能查到，是有没有效力的分界线。人社部明确：经评价合格取得的职业技能等级证书和职业资格证书具有同等效力，都可以在「技能人才评价证书全国联网查询系统」查到。你在报班之前，先问招生的人「这个证在 zscx.osta.org.cn 查得到吗」，看他敢不敢正面回答。\n- 收益：人社部答记者问原文：「劳动者经评价合格取得的职业技能等级证书和职业资格证书具有同等效力，均可通过『技能人才评价证书全国联网查询系统』（zscx.osta.org.cn 或 jndj.osta.org.cn）查询。」另有专业说明：退出目录前已发放的职业资格证书继续有效，可作为持证者职业能力水平的证明。\n- 证据等级：A\n- 来源：人力资源社会保障部答记者问，同第 2 条。\n- 备注：这条和第 1、2 条是同一套动作的不同环节：查目录（这个证是不是国家承认的职业）→ 查分类（是不是准入类）→ 查联网系统（发的证有没有登记）。三个动作加起来不到半小时，是这一节里性价比最高的半小时。\n\n### 6. 专升本划不划算：先往算式里放这两个数\n\n<!-- 成本标签: 钱=中 时间=大 毅力=是 收益=大 口径=就业 -->\n\n- 成本：多花 2 年（部分省份 3 年）在校时间，以及这段时间的学费和少挣的工资。高职专升本通常还要加一轮考试备考。\n- 说人话：这道题不该凭「学历越高越好」或「学历已经贬值了」来拍。全世界长期数据给的两个数是：多受一年教育，落到自己收入上的私人回报平均约为每年 9%；每多受一年教育，成人死亡风险降约 1.9%。你要是三年制专科接两年本科，等于多受两年教育，可以把 9% 乘两遍看看量级。然后把这个数和你为专升本付出的一切（备考时间、两年学费、可能放弃的工作机会）放在同一张纸上比。\n- 收益：Psacharopoulos 和 Patrinos 对全球文献的十年期综述给出的结论是，多受一年教育的全球平均私人回报率约为每年 9%。原书第 23 节第 2 条引用的另一项结论是每多受一年教育，成人死亡风险降低约 1.9%。\n- 路径：高职——本题实际对应的决策是「要不要专升本」，关键变量是本省当年的专升本招生计划与对口专业，去省教育考试院官网查当年实施办法，别用学长学姐去年的经验；本科——对应的是「要不要考研」，成本结构不同（多 3 年，且就业替代项的机会成本更高）。\n- 证据等级：B\n- 来源：Psacharopoulos G, Patrinos HA (2018). Returns to investment in education: a decennial review of the global literature. Education Economics, 26(5), 445–458. <https://doi.org/10.1080/09645292.2018.1484426>\n- 备注：给 B 的原因：这是对大量观察性研究的汇总，不是随机试验——「多受教育」和「收入高」之间必然存在能力、家庭背景等自选择因素。而且 9% 是全球平均，中国、不同专业、不同层次的差异很大。**这条只能用来确立「这件事大概率是正回报」，不能用来算你个人的具体收益。** 路径提示：高职生这一题的实际变量是「你们省当年的专升本招生计划和对口专业」，这个数据每年变，去省教育考试院官网查当年的招生工作实施办法，别用学长学姐去年的经验。\n\n### 7. 挑技能时优先挑「要动手、要现场判断」的\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=就业 -->\n\n- 成本：不花钱。只是选方向时的一个排序原则。\n- 说人话：容易被自动化顶掉的是「照规则处理信息」的活；不容易被顶掉的是「手上有活、现场要判断」的活。同样的时间，学一个要动手的专业技能，比学一个纯软件操作流程更抗风险。这条对高职学生尤其适用——你们的实训课恰好就在这一侧。\n- 收益：Frey 和 Osborne 用职业任务的可自动化程度估算了 702 种职业被计算机化取代的概率，得出体力环境感知与精细操作、需要现场适应与判断的任务，自动化难度显著更高。这项研究的分类方法和预测被后续文献广泛批评（对「高概率」的定义过宽），但其「按任务而非按职业判断」的思路被普遍接受。\n- 证据等级：C\n- 来源：Frey CB, Osborne MA (2017). The Future of Employment: How Susceptible Are Jobs to Computerisation? Technological Forecasting and Social Change, 114, 254–280. <https://doi.org/10.1016/j.techfore.2016.08.019>\n- 备注：给 C 的原因：方法学争议较大，不能当硬证据。保留它是因为这条建议的方向在实务上被反复印证，且退一步说也不吃亏——动手和现场判断的能力，即使在自动化程度低的岗位也通用。\n\n### 8. 参加竞赛之前，先弄清你们学校认哪些赛事\n\n<!-- 成本标签: 钱=少 时间=大 毅力=是 收益=中 口径=学业 -->\n\n- 成本：报名费通常不高，但训练和备赛时间极大——一项大赛的准备往往要一整个学期。\n- 说人话：竞赛的时间成本是这一节里最高的，所以第一件事不是选指导老师，是确认这个赛事在你们学校的「认账清单」上。同一个奖，在 A 校算专升本加分、算评优加分，在 B 校可能什么都不算。**先查本校教务处或学生处的竞赛认定文件，再决定投入。**\n- 收益：竞赛的价值主要体现在两条出口：本校的学分折算与评优认定；以及部分省级专升本政策中的免试或加分条款。两条都由地方和学校自行规定：《普通高等学校学生管理规定》第十七条只规定「学生参加创新创业、社会实践等活动以及发表论文、获得专利授权等与专业学习、学业要求相关的经历、成果，可以折算为学分，计入学业成绩。具体办法由学校规定」。\n- 证据等级：C\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第十七条。<https://www.moe.gov.cn/jyb_xxgk/xxgk/zhengce/guizhang/202112/t20211206_585064.html> ; 各省专升本免试与加分条款见各省当年《普通高校专升本招生工作实施办法》（**具体院校与赛事名单为待核实项，逐年变动**）\n- 备注：给 C 的原因：国家级文件只给了「可以折算学分、具体办法由学校规定」这个授权，剩下全在地方和学校手里。所以任何一份跨省的「大学生必参加的高含金量竞赛榜单」都要打折看。正确动作只有一个：去你本校教务处官网，搜「竞赛」两个字，把认定文件找出来，看清单。\n","05-考驾照.md":"# 第 5 节 考驾照\n\n**口径**：时间（练车小时）／钱（学费、补考费）／安全（资格与时限）\n\n这一节全部内容都来自《机动车驾驶证申领和使用规定》（公安部令第 162 号，2022 年 4 月 1 日起施行）。它的特点是：**规则极其明确，而学生踩的坑几乎全是「没算时限」**——不是不会开车，是拖过了三年。\n\n---\n\n### 1. 满 18 周岁才能报，另有几项身体条件是硬指标\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=安全 -->\n\n- 成本：不花钱。报名前自查一遍，或直接去体检。\n- 说人话：申请小型汽车（C1）、小型自动挡汽车（C2）准驾车型的，要年满 18 周岁。身体条件里最容易被忽略的两项：两眼裸视力或者矫正视力要达到对数视力表 4.9 以上（C 类；A、B 类要 5.0 以上），以及**无红绿色盲**。戴眼镜没关系，矫正视力算数。\n- 收益：《机动车驾驶证申领和使用规定》第十四条规定：申请小型汽车、小型自动挡汽车、残疾人专用小型自动挡载客汽车、轻便摩托车准驾车型的，年龄须在 18 周岁以上。视力方面，申请其他准驾车型的两眼裸视力或者矫正视力须达到对数视力表 4.9 以上；辨色力方面须无红绿色盲。\n- 证据等级：A\n- 来源：《机动车驾驶证申领和使用规定》（公安部令第 162 号）第十四条。<https://app.mps.gov.cn/gdnps/pc/content.jsp?id=8282335>\n- 备注：给 A 是因为这是部门规章原文。补充一点：视力标准是按「矫正视力」算的，也就是近视可以做矫正，但色盲不可矫正，这是很多人在报名前才发现的问题。如果你有色觉异常，先去医院确认，不要先交钱。\n\n### 2. 学习驾驶证明有效期 3 年——这是你整件事的倒计时\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=大 口径=时间 -->\n\n- 成本：不花钱。记一个日期。\n- 说人话：你通过科目一之后会拿到一张「学习驾驶证明」，它的有效期是三年。**三年内没考完科目二和科目三，已经考过的科目成绩全部作废。** 这一条是所有驾考坑里最贵的：作废意味着科目一也要重考，学费还要再交一遍。所以报名那天就把「报名日 + 3 年」记进日历，别等。\n- 收益：《机动车驾驶证申领和使用规定》第三十九条相关规定：申请人在场地和道路上学习驾驶，应当按规定取得学习驾驶证明。学习驾驶证明的有效期为三年，但有效期截止日期不得超过申请年龄条件上限。申请人应当在有效期内完成科目二和科目三考试，未在有效期内完成考试的，已考试合格的科目成绩作废。\n- 证据等级：A\n- 来源：同上（公安部令第 162 号）；另见柳州市城中区人民政府《驾考还没考完，如何申请变更考试地？》。<http://www.czq.gov.cn/wsbs/ggfw/zjbl/jszcz/t19700101_3795159.shtml>\n- 备注：有效期起算点是拿到学习驾驶证明的时间（科目一合格后），不是报名交钱的时间。三年听起来很长，但大学生最常见的失手场景是：大二报名、考完科目一，然后大三实习、大四找工作，一晃就过了。**如果你是抱着「假期慢慢考」的心态，先算一下本科或专科还剩几个完整假期。**\n\n### 3. 科目二和科目三各只有 5 次预约机会，第 5 次不过就全部清零\n\n<!-- 成本标签: 钱=中 时间=大 毅力=些 收益=大 口径=时间 -->\n\n- 成本：每次补考一般要另交补考费（各驾校和车管所标准不同）。\n- 说人话：科目二、科目三各只能预约 5 次。第 5 次还是不合格，**已经考合格的其他科目成绩全部作废**——包括科目一。也就是说科目二三不是「无限重试」的，它们是有限的。科目一和科目三安全文明驾驶常识（俗称科目四）没有次数限制。\n- 收益：《机动车驾驶证申领和使用规定》第四十七条：在学习驾驶证明有效期内，科目二和科目三道路驾驶技能考试预约考试的次数分别不得超过五次。第五次考试仍不合格的，已考试合格的其他科目成绩作废。\n- 证据等级：A\n- 来源：同上；另见深圳市公安局交通警察局《科目二可以预约考试几次？》。<https://szjj.sz.gov.cn/ZDYW/BHZ/BHZ_CJWT/content/post_9686127.html>\n- 备注：注意区分「考试」和「预约」：每预约一次，包含 1 次正式考试和 1 次当场补考机会，所以实际能考的场次比 5 次多。但预约次数的上限是 5，这一点没有余地。多练两次再约，比早约一次更划算——这句话在别处可能不成立，在这里成立，因为次数是资源。\n\n### 4. 每科考 1 次 + 当场补考 1 次；科目二三重新预约要等 10 天\n\n<!-- 成本标签: 钱=少 时间=中 毅力=否 收益=中 口径=时间 -->\n\n- 成本：等 10 天，外加一次补考费。\n- 说人话：每个科目考一次，不合格可以当场补考一次。不补考或者补考还是不过，这次考试就终止了，要重新预约，而且科目二、科目三必须等**十天**之后才能重新约。所以「第一次挂了 → 隔天再约」是做不到的，中间那十天就是你的复盘窗口。\n- 收益：《机动车驾驶证申领和使用规定》第四十七条：每个科目考试一次，考试不合格的，可以补考一次。不参加补考或者补考仍不合格的，本次考试终止，申请人应当重新预约考试，但科目二、科目三考试应当在十日后预约。科目三安全文明驾驶常识考试不合格的，已通过的道路驾驶技能考试成绩有效。\n- 证据等级：A\n- 来源：同上（公安部令第 162 号）；另见上思县人民政府《机动车驾驶证申领》。<http://www.shangsi.gov.cn/fw/ggfw/jt/jszsl.shtml>\n- 备注：最后那句值得单独记住：**科目三安全文明驾驶常识（科目四）不合格，已经通过的道路驾驶技能考试成绩有效**。意思是科目四挂了不会连累科目三，科目一二三不用重来，只重考科目四。这是规则里少数「挂科不连坐」的地方。\n\n### 5. 换城市考要办「变更考试地」，上限 3 次\n\n<!-- 成本标签: 钱=少 时间=中 毅力=否 收益=大 口径=时间 -->\n\n- 成本：要跑车管所（需本人办理、不可代办），没完成培训的还要先拿到转入地驾校的接收证明。\n- 说人话：在学校所在城市考到一半，毕业或者实习要去别的城市，可以申请变更考试地、在现居住地接着考剩下的科目，学习记录和已考成绩都保留。**但一生只能变更 3 次。** 所以「这学期在这个城市、下学期换一个」这种做法要省着用。\n- 收益：《机动车驾驶证申领和使用规定》第三十九条第三款：申请人申请小型汽车、小型自动挡汽车、低速载货汽车、三轮汽车、残疾人专用小型自动挡载客汽车、轻型牵引挂车驾驶证期间，已通过部分科目考试后，居住地发生变更的，可以申请变更考试地，在现居住地预约其他科目考试。申请变更考试地不得超过三次。所需材料：申请人有效身份证明原件和复印件、近期三张一寸白底彩照、驾校接收证明（未完成培训的需提供）。\n- 证据等级：A\n- 来源：柳州市城中区人民政府《驾考还没考完，如何申请变更考试地？》。<http://www.czq.gov.cn/wsbs/ggfw/zjbl/jszcz/t19700101_3795159.shtml>\n- 备注：对在校生的含义很直接：**尽量在一个城市一路考完，别指望靠变更考试地兜底**，因为只有 3 次，而且每次都要跑手续。如果你已经预见到毕业后会换城市，那正确的应对是尽早把科目二三在实习之前考掉，而不是留着以后慢慢转。\n\n### 6. 有几种情况会让你好几年内压根报不了名——其中一条和「代考」有关\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=安全 -->\n\n- 成本：不花钱。\n- 说人话：除了疾病和酒驾等情形，有一条和学生距离最近：**三年内有代替他人参加机动车驾驶人考试行为的，不得申请机动车驾驶证。** 替人考驾照不是「帮忙」，是把自己的驾照资格押出去三年，而且记录跨系统留存，躲不过。\n- 收益：《机动车驾驶证申领和使用规定》第十五条列举不得申请的情形，第十二项为「三年内有代替他人参加机动车驾驶人考试行为的」。同条还规定了醉酒驾驶被吊销未满五年、饮酒后驾驶营运机动车被吊销未满五年等情形。\n- 证据等级：A\n- 来源：《机动车驾驶证申领和使用规定》（公安部令第 162 号）第十五条。<https://app.mps.gov.cn/gdnps/pc/content.jsp?id=8282335>\n- 备注：这条放在这里，是因为驾考代考在学生群体里确实存在，而且被当成「小事」。它不是小事：这一条是《规定》里唯一专门针对考试作弊设置的资格禁止条款，处理方式和醉驾、逃逸并列。\n\n### 7. 什么时候学：先数清你还有几个完整假期\n\n<!-- 成本标签: 钱=0 时间=大 毅力=是 收益=中 口径=时间 -->\n\n- 成本：一个完整假期（按 30 到 45 天算）。\n- 说人话：驾照的时间消耗集中在练车，而练车需要连续、密集的时间段。学期中每周挤两小时的效果，明显不如假期里每天连练。所以决策顺序应该是：先数剩下的完整假期有几个，再决定这学期报还是下个假期报。大三以后假期会被实习占掉，这是最常见的失算点。\n- 收益：没有研究比较过「集中练车」和「分散练车」的通过率。可类比的是「分散练习优于集中练习」这条学习规律——但它在这里很可能反过来成立，因为驾考考的是动作技能，而动作技能的练习需要连续积累肌肉记忆，集中训练的收益通常高于分散。**这一点本书明确承认：**学习科学的结论不能直接照搬到技能训练上。\n- 路径：高职——三年级通常整年安排岗位实习，可用的完整假期比本科生少，所以更该在大二结束前把科目二三考掉；本科——大三、大四的假期会被考研、实习和求职占掉，同样宜早不宜晚。\n- 证据等级：D\n- 来源：无。本条没有找到直接研究，且方向存在不确定性。\n- 备注：给 D 的原因：找不到研究，而且我上面那段「可类比但可能反过来」的推理本身就说明这条不牢。写出来是因为「数假期」这个动作是纯算术，不需要证据支持。要提醒的是：D 级条目在本书里的作用只是**提醒你别漏掉这个变量**，不是给你结论。\n\n### 8. 报名前把报价单拆开问：补考费、练车费、模拟费各算什么\n\n<!-- 成本标签: 钱=中 时间=少 毅力=否 收益=中 口径=钱 -->\n\n- 成本：问清楚花二十分钟，可能省几百到上千元。\n- 说人话：驾校报价通常只含「培训费」，不含补考费、增练车费、考场模拟费。你要问的是这四句：报价里包含几次科目二三的补考费？超出部分怎么算？练车有没有额外计时费？模拟考要不要另付？把答案写下来再签字。\n- 收益：没有关于驾校报价结构的统计数据。可依据的规则是：想变更考试地时，未完成培训的申请人需要转入地驾校开具接收证明——这意味着你中途换驾校会涉及费用和手续，报名前更该把条款看全。\n- 证据等级：D\n- 来源：无直接数据。相关程序规定见柳州市城中区人民政府《驾考还没考完，如何申请变更考试地？》。\n- 备注：给 D 的原因：这一节的其他条目都有公安部规章兜底，只有这一条是纯经验。之所以还是写，是因为它是这一节里**唯一一条「说错话也不会违法、但不问清楚就会多花钱」**的事项，而学生最容易在这上面吃亏。如果你觉得这条不够「有证据」，可以按原书的标准把它降级成「备注」而不是条目——这正是本书 D 级存在的意义：它标出了证据的边界在哪。\n","06-学生会社团与学生工作.md":"# 第 6 节 学生会、社团与学生工作\n\n**口径**：时间（每周几小时）／学业（学分、绩点）／技能（可迁移能力）\n\n**先说清楚这一节的证据情况。** 这是全书证据最弱的一节，没有之一。原因很实在：「该不该进学生会」没办法做随机对照试验——你不可能把学生随机分配进学生会再追踪四年。所以下面 8 条里有 6 条是 D 级。这不是这本书偷懒，是这一节本来就只有这么点证据。**把 D 级条目当成「值得考虑的变量」，而不是「结论」。**\n\n---\n\n### 1. 进之前先算小时账：每周几小时 × 还有几周\n\n<!-- 成本标签: 钱=0 时间=大 毅力=是 收益=负 口径=时间 -->\n\n- 成本：不花钱。花十分钟做一道乘法。\n- 说人话：学生工作最大的代价不是钱，是**每周稳定的、不可协商的时间**。开会、值班、搬东西、做表格，这些事不会因为你明天有考试就消失。所以进之前先写一个数出来：每周固定投入几小时，乘上你还能干几个学期（按 18 周/学期算）。假设每周 6 小时、干 3 个学期，就是 324 小时。**这个数就是你为这件事付的价**，然后问自己它换回了什么。\n- 收益：没有研究比较过学生工作者的长期收益。此处的算术不依赖任何研究：每周小时数 × 周数 = 总投入，是定义式。\n- 证据等级：D\n- 来源：无。本条不含研究结论。\n- 备注：之所以把这条排第一，是因为**它是这一节里唯一一条不需要证据就成立的条目**——它只是一个乘法。这一节其他条目都要靠判断，只有这条能让你先看清成本量级。另外提醒一句：不同组织的实际投入差异极大（有的每周 1 小时，有的每周 10 小时以上），一定要去问**正在里面的人**「上学期你平均每周花多少小时」，不要问招新的人。\n\n### 2. 只留下「你独立负责过一件有始有终的事」这一条标准\n\n<!-- 成本标签: 钱=0 时间=中 毅力=些 收益=中 口径=技能 -->\n\n- 成本：不额外花钱。进去之后主动争取一个能署名的事。\n- 说人话：学生工作里真正能带走的东西不是职位，是「一件从头做到尾、你能说清自己做了什么、结果是什么样的」事。办一场活动、做一份调研、管一笔预算、把一个账号从 0 做到多少粉，都算。**如果干满两年还举不出一件这样的事，那两年基本等于只换了一个头衔。**\n- 收益：没有研究测量过学生工作经历的可迁移能力。间接依据是：可迁移能力的评估普遍要求「具体行为证据」而非「角色名称」，这一原则在结构化面试的效度研究里有支持（结构化面试的核心就是把问题锚定在具体行为上）。\n- 证据等级：D\n- 来源：无。找不到直接研究。\n- 备注：给 D 的原因：这条完全是从「简历和面试怎么被评估」推出来的，不是研究结论。但它有一个好处——**它把「值不值得」变成了可执行的动作**：进去之后第一学期就锁定一个项目，做完再决定要不要留。你不需要先判断这个组织值不值，只需要判断这一件事值不值。\n\n### 3. 选社团只看一条：它有没有每周固定出现的活动\n\n<!-- 成本标签: 钱=少 时间=中 毅力=些 收益=中 口径=技能 -->\n\n- 成本：会费通常不高（几十到一两百元），但时间是持续的。\n- 说人话：很多社团的实际情况是「开学招新一次、期末聚餐一次」，中间什么都没有。这类社团对能力的提升接近零。判断方法很朴素：**问学长这个社团上个学期办过几次活动、具体是哪几次。** 答得出具体活动的，留下；答不出、只会说「氛围很好」的，别交会费。\n- 收益：没有研究测量过社团参与对能力的影响。有一类研究表明，学生参与课外活动与学业成绩的关系取决于活动类型和时间投入量，但结果在不同研究间不一致，无法给出方向明确的结论。\n- 证据等级：D\n- 来源：无。本书没有找到可引用的高质量研究，**这一点如实标注**。\n- 备注：给 D 的原因同上。之所以还是写，是因为「问上一学期办过几次活动」这个动作的成本是零、信息量很大。这是那种「没有证据但问了也不亏」的条目。\n\n### 4. 「部长」「主席」这些头衔，在简历上约等于零\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=就业 -->\n\n- 成本：不花钱。\n- 说人话：招聘方看简历时，头衔本身不构成信息——因为每个学校、每个组织都叫「部长」，含金量差别巨大，招聘方无法比较。能被比较的只有两类：可量化的结果，和可验证的作品。所以写简历时，把「担任XX部部长」改写成「组织过 X 场活动，累计 X 人参与，拉到的赞助 X 元」。\n- 收益：没有针对学生干部头衔的招聘效度研究。可依据的通用结论是：非结构化、无法横向比较的信息在选拔中的预测效度低，因此结构化面试和有明确行为锚点的评价方式被普遍采用。\n- 证据等级：D\n- 来源：无。找不到针对该问题的研究。\n- 备注：给 D 的原因：这是从招聘评估的通用原则推出来的，不是直接证据。这条和第 2 条是配套的：第 2 条告诉你进去要争取什么，这一条告诉你争取到了之后怎么写。\n\n### 5. 学校和你有利益冲突时，你手上有明文规定的权利\n\n<!-- 成本标签: 钱=0 时间=少 毅力=些 收益=大 口径=安全 -->\n\n- 成本：不花钱。知道有这几条就行。\n- 说人话：学生不是只能听安排的。规章明确写着你有两项权利：一是在校内组织、参加学生团体，以适当方式参与学校管理，对学校与学生权益相关事务享有知情权、参与权、表达权和监督权；二是对学校的处理或处分有异议，可以申诉。学校一方也有义务：应当建立和完善学生参与管理的组织形式，支持和保障学生依法、依章程参与学校管理。\n- 收益：《普通高等学校学生管理规定》第六条第（五）（六）项规定了学生的上述参与权和申诉权；第四十条规定「学校应当建立和完善学生参与管理的组织形式，支持和保障学生依法、依章程参与学校管理」。\n- 证据等级：A\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第六条、第四十条。<https://www.moe.gov.cn/jyb_xxgk/xxgk/zhengce/guizhang/202112/t20211206_585064.html>\n- 备注：给 A 是因为这是部门规章原文。申诉的具体时限很关键，抄在这里：对处理或处分决定有异议，在接到决定书之日起 **10 日内**向学校学生申诉处理委员会提出书面申诉；申诉处理委员会应在接到书面申诉之日起 **15 日内**作出复查结论（复杂的可延长 15 日）；对复查决定仍有异议，在接到复查决定书之日起 **15 日内**向学校所在地省级教育行政部门提出书面申诉，省级部门在 **30 个工作日内**处理并作出决定。这三个时限一旦错过就没有第二次。\n\n### 6. 有些活别接：涉及代收费、拉人头、垫钱的一律不干\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=负 口径=安全 -->\n\n- 成本：不花钱。拒绝一次有点尴尬。\n- 说人话：学生组织里偶尔会出现这类任务——帮忙收社团费、代收某个「项目」的钱、拉同学进某个群或某个「创业项目」、先自己垫钱后面报销。前两类涉及钱和资质，第三类里混着非法传销。规章里写得很清楚：学生不得参与非法传销。\n- 收益：《普通高等学校学生管理规定》第四十二条规定，学生不得有酗酒、打架斗殴、赌博、吸毒，传播、复制、贩卖非法书刊和音像制品等违法行为；**不得参与非法传销**和进行邪教、封建迷信活动；不得从事或者参与有损大学生形象、有悖社会公序良俗的活动。\n- 证据等级：A（禁止性规定）/ B（「拉人头型兼职常与非法传销同源」这一判断）\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第四十二条 ; 兼职务工的法律红线见本书第 8 节。\n- 备注：为什么把这条放在学生工作一节里：因为这类任务通常不以「兼职」的名义出现，而是以「部门任务」「老师安排的」名义出现，学生更难拒绝。判断标准只需一句：**这件事要不要从同学手里收钱，或者要不要靠拉同学来产生收益。** 要，就不做。第 8 节第 5 条会讲这条线在刑法上画在哪里。\n\n### 7. 学生工作和社会实践可以折算学分，但办法在校方手里\n\n<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=中 口径=学业 -->\n\n- 成本：不花钱。去教务处问一次。\n- 说人话：你花在学生工作上的时间，可能有一部分能换成学分——不是自动换，是你得去申请。规章给了学校这个授权：参加创新创业、社会实践等活动以及发表论文、获得专利授权等与专业学习、学业要求相关的经历、成果，可以折算为学分。具体折算多少、怎么申请，写在各校自己的办法里。\n- 收益：《普通高等学校学生管理规定》第十七条：「学生参加创新创业、社会实践等活动以及发表论文、获得专利授权等与专业学习、学业要求相关的经历、成果，可以折算为学分，计入学业成绩。具体办法由学校规定。学校应当鼓励、支持和指导学生参加社会实践、创新创业活动，可以建立创新创业档案、设置创新创业学分。」\n- 证据等级：A（授权条款）/ D（学生工作是否被计入，各校差异极大）\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第十七条。\n- 备注：两条合并的原因和结果：**国家级文件只给了「可以折算」这个授权，具体范围全在学校**。有的学校把学生会任职明确写进创新创业学分或综合素质学分认定办法，有的完全不认。所以正确动作是开学初去教务处或学生处官网搜「学分认定」四个字。这也是本书第 4 节第 8 条（竞赛）的同一条逻辑——凡是写着「具体办法由学校规定」的事，答案都在本校文件里，不在任何一份跨校榜单里。\n\n### 8. 时间冲突的处理顺序：学业 > 学生工作，这条不需要讨论\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=学业 -->\n\n- 成本：不花钱。提前和负责人说清楚。\n- 说人话：期末周、实训周、实习期，肯定会有冲突。处理方式不是硬扛，是**提前报备**。绝大多数学生组织对「考试周请假」是接受的，他们真正介意的是你临时消失。所以你要做的是在开学时就把这几周的日期发给负责人，而不是到时候失联。\n- 收益：没有研究支持这个排序。有一条相关线索：学生缺勤一旦达到「未经批准连续两周未参加教学活动」，学校可予退学处理（《普通高等学校学生管理规定》第三十条第四项）——也就是说，学业这条线的底线是有明文后果的，学生工作没有。\n- 路径：高职——三年级通常整年安排岗位实习（《职业学校学生实习管理规定》第十二条：学生在实习单位的岗位实习时间一般为 6 个月），实习期间可支配时间会急剧下降，学生工作的投入要在二年级结束前规划完；本科——大三、大四的考研与求职季同理。\n- 证据等级：D\n- 来源：关于退学规定的部分同本书第 1 节第 1 条。\n- 备注：给 D 的原因：没有研究能替你做这个排序，它是价值判断。但下面这半句是有依据的：**学生工作没有硬后果，学业有。** 所以当两者真的只能保一个时，选哪个不需要犹豫。**路径提示**：高职的三年级通常整年安排岗位实习（《职业学校学生实习管理规定》第十二条：学生在实习单位的岗位实习时间一般为 6 个月），实习期间学生工作的可支配时间会急剧下降，这一点最好在大二结束前就规划好；本科生大三、大四的考研与求职季也是同理。\n","07-医保看病与体检.md":"# 第 7 节 医保、看病与体检\n\n**口径**：钱（缴费与自付）／健康（可及性）／时间（报销跑腿）\n\n这一节对在校生的价值特别高，因为**你在校这几年能享受的医保性价比，通常高于毕业后任何时期**：一年几百块钱，覆盖住院、大病、门诊统筹。而绝大多数学生直到生病那天才发现自己不知道医保怎么用。\n\n---\n\n### 1. 大学生在学籍地参加居民医保，不用在老家重复交\n\n<!-- 成本标签: 钱=少 时间=少 毅力=否 收益=大 口径=钱 -->\n\n- 成本：一年个人缴费，2026 年度国家规定的最低标准是每人每年不低于 400 元（财政补助不低于每人每年 700 元）。多数学校会随学费代收。\n- 说人话：大学生医保属于城乡居民基本医疗保险，参保地点是**学籍地**（学校所在城市），不是户籍地。国务院办公厅文件明确「鼓励大学生在学籍地参加居民医保」。医保实行一人一保，在老家也交一份不会让你报销两次——**重复参保不能重复报销**。所以如果家里已经给你在户籍地交了居民医保，就属于白花钱。\n- 收益：《国务院办公厅关于健全基本医疗保险参保长效机制的指导意见》（国办发〔2024〕38 号）规定「鼓励大学生在学籍地参加居民医保，落实参保相关政策，抓好大学生参加居民医保扩面工作」。各类全日制普通高等学校（含民办高校）全日制本专科生、全日制研究生均可参加高校所在地基本医疗保险，一般由高校对接当地医保经办机构统一办理参保手续。\n- 证据等级：A\n- 来源：《国务院办公厅关于健全基本医疗保险参保长效机制的指导意见》（国办发〔2024〕38 号）。<https://www.gov.cn/zhengce/zhengceku/202408/content_6965742.htm>\n- 备注：给 A 是因为这是国务院办公厅文件原文。**这里有一个具体动作值得做**：开学确认学校已为你参保后，打电话让家里停掉户籍地那一份，一年就是几百块。另外，国办发〔2024〕38 号还扩大了职工医保个人账户的共济范围——现在可以用来支付**近亲属**（配偶、父母、子女、兄弟姐妹、祖父母、外祖父母、孙子女、外孙子女）参加居民医保的个人缴费，以及他们在定点医药机构就医购药的个人自付费用。也就是说，你爸妈职工医保卡里的钱，可以给你交这份医保。\n\n### 2. 断保的代价：3 个月待遇等待期，这段时间看病一分不报\n\n<!-- 成本标签: 钱=少 时间=0 毅力=否 收益=大 口径=钱 -->\n\n- 成本：不断保就没有成本。补缴也只是一年的保费。\n- 说人话：从 2025 年起，除了新生儿等特殊群体，如果你没在集中参保期内参保、或者中间断过保，再参保后会有一段**固定待遇等待期 3 个月**，等待期内发生的医疗费用医保一分不报。所以「今年先不交了，等要用再交」这个想法是行不通的——你要用的时候正好在等待期里。\n- 收益：国办发〔2024〕38 号规定：自 2025 年起，除新生儿等特殊群体外，对未在居民医保集中参保期内参保或未连续参保的人员，设置参保后固定待遇等待期 3 个月。断层后再参保的，连续参保年数重新计算。\n- 路径：本科——在校期间通常由学校统一办理，风险最低；高职——三年级整年在外岗位实习，如果实习地不在学籍地，这一年属于异地就医场景，实习开始前先把备案办了（见本节第 5 条）。两类学生共同的高风险时点是毕业离校那一年。\n- 证据等级：A\n- 来源：国办发〔2024〕38 号，同第 1 条；另见中国网《基本医保参保长效机制六大看点》（国务院政策例行吹风会实录）。<https://zw.china.com.cn/2024-08/02/content_117345272.shtml>\n- 备注：这是这一节里最该记住的一条。它的实际含义是：**医保不能「临时想起来再买」**。集中征缴期各地不同（多数省份在每年的 9 月至次年 2 月底左右，各省逐年调整），错过就要等。**路径提示**：对在校生来说，学校统一办理通常不需要你自己操心；真正会出事的是毕业那一年——毕业离校后当期医保待遇会延续到待遇享受期结束，之后必须自己接续（升学→在就读高校所在地继续参加居民医保；就业→由单位办职工医保；灵活就业→以灵活就业人员身份缴职工医保；暂未就业→在户籍地参保下一年度居民医保）。**毕业后这句「忘记接续」，是断保最常见的起点。**\n\n### 3. 连续参保满 4 年，之后每多一年，大病保险封顶线往上抬\n\n<!-- 成本标签: 钱=少 时间=0 毅力=些 收益=中 口径=钱 -->\n\n- 成本：只是别断。\n- 说人话：医保给「一直连着交的人」发奖励。连续参加居民医保满 4 年后，每多连续参保 1 年，大病保险的最高支付限额提高不低于 1000 元；当年一次都没报销过的人，次年也能提高额度。单人累计提高的总额不超过当地大病保险原封顶线的 20%。断保之后重新参保，连续年数从头算。\n- 收益：国办发〔2024〕38 号规定：建立对居民医保连续参保人员和零报销人员的大病保险待遇激励机制。自 2025 年起，对连续参加居民医保满 4 年的参保人员，之后每连续参保 1 年，可适当提高大病保险最高支付限额；对当年基金零报销的居民医保参保人员，次年可提高大病保险最高支付限额。两项激励原则上每次提高限额均不低于 1000 元，累计提高总额不超过所在统筹地区大病保险原封顶线的 20%。\n- 证据等级：A\n- 来源：国办发〔2024〕38 号，同第 1 条。\n- 备注：给 A 是因为文件写得很具体。要注意「不低于 1000 元」是**下限**，具体数额由各省定；「20%」是**上限**。所以别按 1000 元 × 年数去算总额。这条的实际用法是：**它把「连续参保」变成了一件有可见回报的事**——你要放弃的只是一点侥幸心理。\n\n### 4. 看病先看级别：同一个统筹地区里，级别越低报销比例越高\n\n<!-- 成本标签: 钱=少 时间=少 毅力=些 收益=中 口径=钱 -->\n\n- 成本：去社区医院多走几步路，或者多挂一个转诊。\n- 说人话：这可能是整本书里最省钱的一条——**同一个参保地（统筹地区）里，医院级别越低，报销比例越高**。各地差距不同，但方向一致。所以感冒发烧、慢病开药、复查化验这类事，去基层医疗机构；真要上大医院，走基层转诊或者医院的转诊中心，住院起付线还能接着算。另外，非医保定点医院产生的费用、以及医保目录外的药品和诊疗项目，都不在报销范围内。\n- 收益：国办发〔2024〕38 号提出「有条件的地区可将居民医保年度新增筹资的一定比例用于加强门诊保障，并向基层医疗机构倾斜，引导群众在基层就医」。参保大学生在待遇享受期内可享受门诊统筹待遇、门诊慢特病待遇、住院待遇、大病保险待遇；凭医保卡或医保电子凭证直接结算。\n- 证据等级：B\n- 来源：国办发〔2024〕38 号，同第 1 条；待遇种类与结算方式见各地医保部门发布的大学生医保政策解读（如中国西藏之声网《准大学生请注意，这些医保知识务必知晓》）。<https://www.vtibet.cn/html/CHAL1492477520535104/202111918263458933/index.shtml>\n- 备注：给 B 的原因：**方向（级别越低比例越高）是全国一致的，但具体差几个百分点各地不同，本书不给数字。** 要拿到你自己学校的真实数字，只有一个办法：打参保地医保局的电话，或者查当地「大学生医保待遇政策」文件。原书《高性价比人生指南》第 24 节第 2 条给的「差距约 10 个百分点」是它当时的估算，不是全国统一标准，**引用时必须说明这一点**。\n\n### 5. 跨省或异地看病之前先备案，别先垫钱再跑回头报销\n\n<!-- 成本标签: 钱=少 时间=中 毅力=些 收益=大 口径=钱 -->\n\n- 成本：备案花十几分钟（多数地区可以在医保 App 或国家医保服务平台线上办）。\n- 说人话：不在参保地看病，要先办异地就医备案，办完就能在异地定点医院直接结算，不用自己先垫几千块再拿票据回去报销。**路径提示**：高职的三年级通常整年在外岗位实习，如果实习地不在学籍地，那这一整年你都属于异地就医场景——实习开始前就把备案办了。这也是本书给高职学生最实用的一条操作建议。\n- 收益：居民医保异地就医直接结算的前提是办理备案；未备案自行前往异地就医，可能面临降低报销比例或需回参保地手工报销。各地规则不同，以参保地医保部门规定为准。\n- 证据等级：B\n- 来源：国办发〔2024〕38 号（参保地与常住地衔接的政策框架）; 各地医保经办规程（备案渠道与规则由地方规定）。\n- 备注：给 B 的原因：备案这件事本身是硬规则，但**「未备案会怎样」各地差别很大**——有的降比例，有的要先自付再手工报销，有的已开通临时外出就医免备案直接结算。所以这条的正确用法是：**在实习或长假出发前，先给参保地医保局打一个电话问清三件事**——需不需要备案、在哪备案、没备案会怎样。这个电话十分钟，可能省下一次几千块的垫付。\n\n### 6. 每次看完病，病历、检查报告和影像自己留一份\n\n<!-- 成本标签: 钱=少 时间=少 毅力=些 收益=中 口径=健康 -->\n\n- 成本：每次多花一点时间复印或拍照。复印件通常几块钱。\n- 说人话：医院保存病历有期限，而且你要换医院、换城市、毕业回老家之后，原来那家医院的东西你拿不到。所以每次看完病，把病历、化验单、影像（片子和报告）自己存一份——纸质拍个照、电子版存进云盘。**这不是为打官司准备的，是为「下一次看病时医生问你以前怎么治的」准备的。**\n- 收益：没有研究量化「自己保留病历」的收益。这条的依据是实务需要：跨机构就诊时，既往检查结果和用药史是诊断的重要输入；病历的完整性和可及性随时间和机构变动而下降。\n- 证据等级：C\n- 来源：无直接研究。相关权利见《中华人民共和国医师法》《医疗机构病历管理规定》（病历复印与封存的相关规定由卫生行政部门制定）。\n- 备注：给 C 的原因：这是实践共识而非研究结论。给到 C 而不是 D，是因为它对应的是明确的制度（病历管理有专门规定），只是收益没法量化。**对你个人的意义是**：这是那种「做的时候觉得多余、需要的时候救命」的事。你有权复印自己的病历，医院应当提供。\n\n### 7. 急病直奔急诊预检分诊台，没带钱、没带证件也必须先救\n\n<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=大 口径=健康 -->\n\n- 成本：不花钱。记住一个动作。\n- 说人话：遇到真正的急症，不要去挂号窗口排队，直接到急诊的预检分诊台。而且——**没带钱、没带身份证、说不清自己是谁，医院也必须先抢救**。这是法律义务，不是人情。所以第一条不是「先凑钱」，是「先到急诊」。\n- 收益：《医疗机构管理条例》规定，医疗机构对危重病人应当立即抢救；对限于设备或者技术条件不能诊治的病人，应当及时转诊。《中华人民共和国医师法》规定，对需要紧急救治的患者，医师应当采取紧急措施进行诊治，不得拒绝急救处置；因抢救生命垂危的患者等紧急情况，不能取得患者或者其近亲属意见的，经医疗机构负责人或者授权的负责人批准，可以立即实施相应的医疗措施。\n- 证据等级：A\n- 来源：《医疗机构管理条例》第三十一条 ; 《中华人民共和国医师法》（2021 年 8 月 20 日通过，2022 年 3 月 1 日起施行）第二十七条。\n- 备注：给 A 是因为这是法规原文。补充两点：一是急诊实行预检分诊，即按病情紧急程度而不是到达顺序处理，所以「老老实实排队」在急诊反而可能耽误事；二是大学生独自在外，手机里应该常备两个号：学校辅导员的，和同宿舍或同班一个走得近的同学的。真正需要签字或垫付的时候，医院联系的第一个人通常是他俩。\n\n### 8. 学生体检的报告单，自己看一遍，异常项当年去医院查\n\n<!-- 成本标签: 钱=少 时间=少 毅力=些 收益=中 口径=健康 -->\n\n- 成本：看报告花十分钟。复查可能要花一点钱。\n- 说人话：学校体检通常是筛查，不是诊断。报告单上写「建议复查」「建议进一步检查」的项，如果不处理，这行字就白写了。**把它当成一份待办清单，当年就去做完**，别攒到毕业。\n- 收益：没有研究量化「及时处理体检异常项」在大学生群体中的收益。可参照的机制是：筛查项目的价值来自于后续的确诊与干预环节，仅完成筛查而没有随访，收益接近于零。\n- 证据等级：D\n- 来源：无直接研究。本书未找到针对大学生体检随访率及其后果的高质量研究，**这一项如实标注为空白**。\n- 备注：给 D 的原因：机制清楚但没有数据。之所以写，是因为「体检报告没人看」这件事几乎没有成本上的借口。另外有一条与体检直接相关的硬证据值得知道：每天在户外待够 2 小时是目前唯一有随机试验支持的防近视办法（原书第 30 节第 4 条），而近视度数越深，将来视网膜脱离、黄斑病变、青光眼的风险越高——所以体检单上的视力那一栏，其实是这一整节里最该盯的一项。\n","08-兼职实习与劳动权益.md":"# 第 8 节 兼职、实习与劳动权益\n\n**口径**：钱（报酬与收费）／安全（人身自由、刑法红线）／时间\n\n这是全书**最贵的一节**。不是因为钱多，是因为这一节踩线的代价不是「损失几百块」，是刑事记录。原书《高性价比人生指南》第 9 节把这类内容放在「普通人容易踩的法律红线」里，本节把和学生距离最近的那几条单独拎出来。\n\n**先说清楚适用范围**：本节第 1 到第 5 条依据的是《职业学校学生实习管理规定》（教职成〔2021〕4 号），它的适用范围是**实施全日制学历教育的中职学校、高职专科学校、高职本科学校**学生。本科生不在这个规章的直接适用范围内，本科生实习的权益依据是《民法典》和一般劳动关系规则。**这是本书里高职与本科路径差异最大的地方——高职生在这一块受的保护反而更明确、更细。**\n\n---\n\n### 1. 一年级学生不能被安排岗位实习，这是明文禁止的\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=大 口径=安全 -->\n\n- 成本：不花钱。\n- 说人话：有学校或企业想把一年级学生直接推去干活，这是明确的违规。《职业学校学生实习管理规定》第十六条第一项就写着「安排、接收一年级在校学生进行岗位实习」属于不得有的情形。同条第二项还禁止安排未满 16 周岁的学生进行岗位实习。\n- 收益：教职成〔2021〕4 号第十六条列举六项禁止情形：(一)安排、接收一年级在校学生进行岗位实习；(二)安排、接收未满 16 周岁的学生进行岗位实习；(三)安排未成年学生从事《未成年工特殊保护规定》中禁忌从事的劳动；(四)安排实习的女学生从事《女职工劳动保护特别规定》中禁忌从事的劳动；(五)安排学生到酒吧、夜总会、歌厅、洗浴中心、电子游戏厅、网吧等营业性娱乐场所实习；(六)通过中介机构或有偿代理组织、安排和管理学生实习工作。此外该条还禁止「安排学生从事 III 级强度及以上体力劳动或其他有害身心健康的实习」。\n- 路径：**本节第 1 至第 5 条、第 8 条依据的规章只直接适用于职业学校学生**（中职、高职专科、高职本科）。本科生不在其直接适用范围内，本科生实习的权益依据是《民法典》和一般劳动关系规则，条款依据不同、但方向一致。这也是本书少数「高职生的保护反而更具体」的地方。\n- 证据等级：A\n- 来源：《职业学校学生实习管理规定》（教职成〔2021〕4 号，教育部等八部门 2021 年 12 月 31 日印发）第十六条。<https://www.moe.gov.cn/srcsite/A07/moe_737/s3876_qt/202201/t20220121_595529.html>\n- 备注：教育部在印发通知中说明，这次修订提出 **1 个「严禁」和 27 个「不得」**。也就是说这不是倡导性条款，是底线红线。第（六）项要特别留意：**通过中介或有偿代理安排实习本身就是被禁止的**，「交钱给你安排实习」这种模式从一开始就不合规。**路径提示**：这一整节第 1 至第 5 条对高职生直接适用；本科生如遇类似情况，可依据《民法典》关于合同和人身权益的规定主张权利，但条款依据不同。\n\n### 2. 实习不得收任何费用，不得扣你的身份证和学生证\n\n<!-- 成本标签: 钱=少 时间=0 毅力=否 收益=大 口径=钱 -->\n\n- 成本：不花钱。敢拒绝就行。\n- 说人话：押金、培训费、服装费、实习材料费、就业服务费、报酬提成、管理费——**一样都不能收**。学生证、身份证也不能扣，不能要求你提供担保，不能以别的名目收你的财物。任何人跟你说「先交钱才能实习」，这句话本身就是违规的证据。\n- 收益：教职成〔2021〕4 号第二十条：职业学校和实习单位不得向学生收取实习押金、培训费、实习报酬提成、管理费、实习材料费、就业服务费或者其他形式的实习费用，不得扣押学生的学生证、居民身份证或其他证件，不得要求学生提供担保或者以其他名义收取学生财物。\n- 证据等级：A\n- 来源：教职成〔2021〕4 号第二十条，同第 1 条。\n- 备注：这条是本节最有用的「一句话判断法」：**凡是向学生收钱的实习安排，都是违规的。** 遇到这种情况的处理顺序是：先留证据（收据、转账记录、聊天记录），再向学校实习管理部门反映，同时可以打当地教育行政部门和市场监管部门的投诉电话。教育部要求各地各校在 2022 年 1 月底前公布监督咨询电话，多数省份至今保留。\n\n### 3. 实习报酬原则上不低于同岗位工资的 80%，直接发给你、不许经第三方转发\n\n<!-- 成本标签: 钱=中 时间=0 毅力=些 收益=大 口径=钱 -->\n\n- 成本：不花钱。但可能要主动去问、去要。\n- 说人话：三个关键点。第一，**数额**：在实习岗位相对独立参与实际工作、初步具备独立工作能力的学生，报酬原则上不低于本单位相同岗位工资标准的 80%，或者不低于最低档工资标准。第二，**发放方式**：以货币形式、及时、足额、**直接支付给学生**——不能给实物、不能给代金券、不能经过第三方转发。第三，**周期**：原则上不超过 1 个月，也就是至少按月发。\n- 收益：教职成〔2021〕4 号第十八条：「接收学生岗位实习的实习单位，应当参考本单位相同岗位的报酬标准和岗位实习学生的工作量、工作强度、工作时间等因素，给予适当的实习报酬。在实习岗位相对独立参与实际工作、初步具备实践岗位独立工作能力的学生，原则上应不低于本单位相同岗位工资标准的 80% 或最低档工资标准，并按照实习协议约定，以货币形式及时、足额、直接支付给学生，原则上支付周期不得超过 1 个月，不得以物品或代金券等代替货币支付或经过第三方转发。」\n- 证据等级：A\n- 来源：教职成〔2021〕4 号第十八条，同第 1 条。\n- 备注：注意这里有**两层限定**——「原则上不低于 80%」针对的是「在实习岗位相对独立参与实际工作、初步具备实践岗位独立工作能力的学生」。刚去还只能跟着看的阶段，标准不同。另外「不得经过第三方转发」这一句很值得记住：如果你发现报酬是发给某个中介再由中介转给你，那这个安排从条文的两个地方同时违了规。\n\n### 4. 不得安排你加班、上夜班，也不得安排在休息日和法定节假日实习\n\n<!-- 成本标签: 钱=0 时间=0 毅力=些 收益=大 口径=安全 -->\n\n- 成本：不花钱。但拒绝加班需要一点勇气。\n- 说人话：实习不是「锻炼吃苦」，它有明确的工作时间限制。教职成〔2021〕4 号第十七条规定，实习单位应遵守国家关于工作时间和休息休假的规定，不得安排学生从事高空、井下、放射性、有毒、易燃易爆等较高安全风险的实习，不得安排学生在休息日、法定节假日实习，不得安排学生加班和上夜班。\n- 收益：第十七条原文如上。例外是「相关专业和实习岗位有特殊要求，并事先报上级主管部门备案的实习安排」（如护理专业的夜班实习、导游专业的节假日实习等），且需事先征得学生及其监护人同意并额外支付报酬。\n- 证据等级：A\n- 来源：教职成〔2021〕4 号第十七条，同第 1 条；另见新华社《规范职业院校实习管理 保障学生合法权益》答问。<https://education.news.cn/2021-07/27/c_1211260972.htm>\n- 备注：例外条款是真实存在的，别把正常专业的特殊安排当成违规。但例外有三个前提：**岗位有专业特殊要求、事先报备、额外付酬**。三个都满足才算例外。\n  另外注意一个容易混淆的点：早期版本（2016 年版）曾表述为「每天实习时间不超过 8 小时、每周不超过 40 小时」，**2021 年修订后的现行条文采用「遵守国家关于工作时间和休息休假的规定，不得安排加班和上夜班」的表述**。所以引用时要用现行表述，不要照抄网上的旧版本。\n\n### 5. 「兼职」要你用自己的银行卡收钱、取现、转账——不管给多少好处费，都不做\n\n<!-- 成本标签: 钱=少 时间=0 毅力=否 收益=负 口径=安全 -->\n\n- 成本：拒绝一次「日结 300 元」的机会。可能还有点被人说「胆小」的尴尬。\n- 说人话：这是学生群体里最高发的刑事陷阱。话术通常是「帮忙走一笔账」「用自己的卡收个款再转出去」「帮忙取点现金给你提成」。你以为自己是打工的，法律上你是**卡农**。相关罪名是帮助信息网络犯罪活动罪（《刑法》第二百八十七条之二），以及掩饰、隐瞒犯罪所得、犯罪所得收益罪（《刑法》第三百一十二条）。\n- 收益：《中华人民共和国刑法》第二百八十七条之二规定了帮助信息网络犯罪活动罪；第三百一十二条规定了掩饰、隐瞒犯罪所得、犯罪所得收益罪。原书《高性价比人生指南》第 9 节第 5 条把这一条写在同一位置：「『兼职』要你用自己的卡收钱、取现、转账，不管给多少好处费都不做」。\n- 证据等级：A（法条存在）/ C（「学生群体高发」这一判断）\n- 来源：《中华人民共和国刑法》第二百八十七条之二、第三百一十二条 ; 《高性价比人生指南》第 9 节第 5 条。<https://github.com/eternity4719/HowToLiveBetter>\n- 备注：给 C 的那半句是因为我没有找到按人群分类的官方案件统计，「学生高发」是司法实务中的常见表述。但**这不影响这条的结论强度**——违法与否不取决于有多少人这么做。判断标准只有一句：**这件事要不要用到你的银行卡、支付账号去收一笔来源不明的钱。** 要，就不做。对「帮朋友一个忙」也一样成立。\n\n### 6. 「包装材料办贷款、按贷款额分你好处费」——一个都不做\n\n<!-- 成本标签: 钱=少 时间=0 毅力=否 收益=负 口径=安全 -->\n\n- 成本：拒绝一次能拿到几千块的机会。\n- 说人话：这类话术会包装成「帮你办助学贷款」「帮你包装资质」「你只要配合签字」。它的实际结构是让你成为骗贷链条上的一环，或者直接让你背上以你名义的债务。原书把这一条写在第 9 节第 6 条，措辞是「一个都不做」。\n- 收益：原书第 9 节第 6 条：「有人拉你去『包装材料』贷款、按贷款额分你好处费，一个都不做。」相关风险涉及伪造材料骗取贷款、以及以你名义形成的真实债务。\n- 证据等级：C\n- 来源：《高性价比人生指南》第 9 节第 6 条。本条为迁移条目，未找到对应的官方统计或研究。\n- 备注：给 C 的原因：这是经验型红线，没有量化数据支撑。迁移过来时保留原书措辞、不改写成更确定的说法。\n  **这里要分清一件事**：正规的国家助学贷款完全不同——它由政府主导、财政贴息，学生在家乡的县级学生资助管理中心或学校办理，银行不收取任何费用、不要求转账、不会索取额外个人信息。凡是主动找上门、要你先交钱或者要你提供额外账号的「助学贷款」，一律是诈骗。\n\n### 7. 身份证、学生证不借人，微信和支付宝账号不租不卖\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=大 口径=安全 -->\n\n- 成本：不花钱。\n- 说人话：「借你的身份证注册个东西」「租你的微信号，一天给你 200」——两件事都别做。身份证不借人、不用别人的身份证，也不拿别人的证件登记、开卡、买票。支付账号和社交账号出借，和被拿去收赃款是同一件事，只是你最晚知道自己涉入。\n- 收益：原书第 9 节第 16 条：「身份证不借人，不用别人的身份证，也不拿别人的证件登记、开卡、买票。」另据《普通高等学校学生管理规定》第四十二条，学生不得有传播、复制、贩卖非法书刊和音像制品等违法行为，不得参与非法传销；学校有权依法依规处理。\n- 证据等级：B\n- 来源：《高性价比人生指南》第 9 节第 16 条 ; 《普通高等学校学生管理规定》（教育部令第 41 号）第四十二条。<https://www.moe.gov.cn/jyb_xxgk/xxgk/zhengce/guizhang/202112/t20211206_585064.html>\n- 备注：给 B 的原因：禁止身份证出借有明确的实名制法规体系支撑，但「账号出借」的后果（在具体案件中被认定为共犯还是提供帮助）要看个案，本书不给统一结论。**实际判断标准仍然只有一句**：租你账号的人，为什么不自己去开一个？答案一定是因为他不能。\n\n### 8. 实习前一定签三方协议，并看清「谁安排你去哪」\n\n<!-- 成本标签: 钱=0 时间=中 毅力=些 收益=大 口径=安全 -->\n\n- 成本：读一份协议，可能花半小时。\n- 说人话：参加岗位实习前，职业学校、实习单位、学生三方**必须以有关部门发布的实习协议示范文本为基础签订协议**，没签协议的不得安排实习。协议里应当写明实习的时间地点内容、食宿与工作时间、**实习报酬及支付方式**、劳动保护与安全卫生条件、责任保险与伤亡事故处理办法。此外，安排岗位实习还应当取得你（以及未成年学生的家长）签字的知情同意书；如果你明确不同意学校安排的实习，可以**自行选择符合条件的岗位实习单位**。\n- 收益：教职成〔2021〕4 号第十四条规定三方必须以实习协议示范文本为基础签订协议，未按规定签订协议的不得安排学生实习；第十五条列明协议应当包括的九项内容；第九条规定安排岗位实习应取得学生及其法定监护人（或家长）签字的知情同意书，明确不同意的可自行选择符合条件的岗位实习单位；第十一条规定不得强制职业学校安排学生到指定单位实习，严禁以营利为目的违规组织实习。\n- 证据等级：A\n- 来源：教职成〔2021〕4 号第九条、第十一条、第十四条、第十五条，同第 1 条。\n- 备注：这一条是本节的总纲——**上面 7 条的权利，绝大多数要落在协议里才能执行**。签字之前至少确认三件事写在纸上：报酬数额和发放日期、工作时间安排、保险怎么保。另外两条用得上的兜底规定：职业学校应当为实习学生投保实习责任保险，费用可从学费中列支，**不得向学生另行收取或从实习报酬中抵扣**（第三十五条）；学生在实习期间受到人身伤害，属于保险赔付范围的由承保保险公司按合同赔付，不属于保险赔付范围或超出赔付额度的部分，由实习单位、职业学校、学生依法承担相应责任（第三十六条）。国家层面还在「积极探索职业学校实习学生参加工伤保险办法」（第三十四条）——也就是说这一块的保障仍在完善中，**因此「保险有没有买」这件事你在签字前一定要问。**\n","09-生活费奖助学金与防骗.md":"# 第 9 节 生活费、奖助学金与防骗\n\n**口径**：钱（学期支出）／时间（跑手续）／安全（信用记录、资金损失）\n\n这一节分两半：前半是「怎么少花冤枉钱」，原型来自原书第 5 节「不要浪费钱」；后半是「怎么把该拿的钱拿到」，这部分原书没有对应章节，是本书新写的——**因为在校生有几种专属的资助和补贴，毕业之后就没有了。**\n\n---\n\n### 1. 关掉所有自动续费，改成到期手动续\n\n<!-- 成本标签: 钱=少 时间=少 毅力=否 收益=大 口径=钱 -->\n\n- 成本：花二十分钟清一次。之后可能多花几次手动操作的时间。\n- 说人话：视频会员、音乐会员、云盘、外卖会员、各种 App 的「首月 1 元」——它们的设计目标就是让你忘记它。自动续费的机制是**把付款动作从你的视野里挪走**，于是你不再对这笔钱做决定。改成手动续，等于每个月重新问自己一次「这个我还用吗」。\n- 收益：没有针对自动续费用户行为的随机试验。相关机制有行为经济学里的「支付解耦」（payment decoupling）研究支持——当付款与消费在时间上分离时，消费者对支出的敏感度下降。\n- 证据等级：B\n- 来源：原书《高性价比人生指南》第 5 节第 1 条「关掉所有自动续费，改为到期手动续」；机制参考 Prelec D, Loewenstein G (1998). The Red and the Black: Mental Accounting of Savings and Debt. Marketing Science, 17(1), 4–28. <https://doi.org/10.1287/mksc.17.1.4>\n- 备注：给 B 的原因：机制有研究，但「关掉自动续费能省多少钱」在大学生群体里没有实测数据。原书把它排在第 5 节第 1 位，说明在它的成本收益排序里这是最优先的一项——理由也很清楚：**这是唯一一条「做一次、永久生效」的省钱动作。**\n\n### 2. 不为消费开分期，不用最低还款\n\n<!-- 成本标签: 钱=少 时间=0 毅力=些 收益=大 口径=钱 -->\n\n- 成本：不花钱。拒绝一次「免息分期」。\n- 说人话：分期和最低还款的作用是让你在同一份收入下同时负担更多支出，它的商业模式就是靠这个赚钱。一旦开始用，通常不会只用一次。原书第 5 节的表述是「不用信用卡最低还款，不为消费开分期或消费贷」。**注意「消费」两个字**：为培训、考证这类有明确回报的支出分期，和为一双鞋分期不是同一件事。\n- 收益：原书《高性价比人生指南》第 5 节第 7 条：「不用信用卡最低还款，不为消费开分期或消费贷。」同节第 8 条另列「不给主播打赏、不给游戏充值、不冲动下单」。\n- 证据等级：B\n- 来源：《高性价比人生指南》第 5 节第 7、8 条。<https://github.com/eternity4719/HowToLiveBetter>\n- 备注：给 B 的原因：这是从机制和行业模式推出的结论，没有实验数据。但这一条有一个便宜的执行方式——**给打赏和游戏充值设一个月度上限并写在手机备忘录里**，比只靠意志力有效。上限的作用不是限制你，是让你在超过时至少有一次觉察。\n\n### 3. 凡是让你报验证码、转账、共享屏幕、开视频会议的，一律是骗子\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=大 口径=钱 -->\n\n- 成本：不花钱。\n- 说人话：诈骗话术每年都在更新，但底层动作只有几个：要验证码、要你转账、要你共享屏幕、要你下载某个 App 并开视频会议、要你拿家长或同学的手机操作。**只要出现其中一个，就挂掉。** 这个判断不依赖对方的身份说得多像——真警察不会通过视频会议办你的案。\n- 收益：《中华人民共和国反电信网络诈骗法》明确了电信业务经营者、银行业金融机构和互联网服务提供者的防范义务，以及个人不得非法出租、出借电话卡、银行账户、支付账户的义务。原书第 5 节第 10 条给出的对应判断句是：「教孩子记一句话：任何人让你拿家长的手机去操作、去报验证码，都是骗子。」\n- 证据等级：B\n- 来源：《中华人民共和国反电信网络诈骗法》（2022 年 9 月 2 日通过，2022 年 12 月 1 日起施行）; 《高性价比人生指南》第 5 节第 10 条。\n- 备注：给 B 的原因：法律规定存在，但「这句话能降低被骗概率」没有量化证据。为什么要用「一律」这种绝对说法：因为**诈骗的识别成本远高于拒绝的成本**——错拒一个真客服，你换个渠道再办一次；错信一次，钱就没了。在不对称的后果下，绝对化的规则比精确的规则更划算。\n  对在校生最需要点名的一类：**刷单返利类诈骗**。它专门面向想兼职的学生，先用小额返利建立信任，再让你垫大额。记住一句话就够了：**正经的兼职不会先让你出钱。**\n\n### 4. 手机丢了，按这个顺序做：挂失 SIM 卡、远程锁定、改密码、报警、冻结银行卡\n\n<!-- 成本标签: 钱=0 时间=中 毅力=否 收益=大 口径=安全 -->\n\n- 成本：几通电话和几个小时。补卡可能有少量费用。\n- 说人话：顺序很重要，别的都可以后补，**挂失 SIM 卡必须第一个做**。因为现在几乎所有账号的找回方式都绑在手机号上——对方拿着你的卡，就能接管你的账号。挂失完再远程锁定、改密码、报警、冻结银行卡。\n- 收益：没有研究测试过这个顺序的有效性。它是从依赖关系推出来的：多数账号体系把手机号作为身份验证与找回的根凭证，因此先切断手机号，等于先切断对方的接管路径。\n- 证据等级：C\n- 来源：原书《高性价比人生指南》第 14 节第 4 条：「手机丢了按这个顺序做：挂失 SIM 卡、远程锁定、改密码、报警、冻结银行卡。」\n- 备注：给 C 的原因：这是原书给出的实务顺序，逻辑清楚但没有实验支撑。迁移时保留原顺序。补一条同源条目备用：卡被盗刷时的处理是**先挂失冻结再报警**，然后要求银行赔付——原书第 14 节第 5 条写明「证明『是你自己刷的』是银行的责任」。\n\n### 5. 邮箱、支付、社交账号全部开二次验证，优先用手机弹窗确认\n\n<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=大 口径=安全 -->\n\n- 成本：每个账号花两分钟设置。之后每次登录多一个动作。\n- 说人话：二次验证是「就算密码泄露，对方也进不去」的那道门。优先级：**手机弹窗确认 > 短信验证码**（短信可能被 SIM 卡劫持或被伪基站截取）。另外，邮箱密码要单独设一个、不和任何网站重复——因为邮箱是其他所有账号的找回入口，它一破，全部都破。\n- 收益：原书第 14 节第 1 条：「邮箱、支付、社交账号都开二次验证，优先用手机弹窗确认，其次才是短信验证码。」第 2 条：「邮箱密码单独一个，不和任何网站重复。」\n- 证据等级：B\n- 来源：《高性价比人生指南》第 14 节第 1、2 条。\n- 备注：给 B 的原因：二次验证降低账号被接管的有效性在业界有大量案例研究，但本书没有找到可引用的量化研究。原书把它排在第 14 节第 1 位，和第 9 节第 1 条一样，属于「做一次、长期生效」的动作。\n\n### 6. 助学贷款：本专科每年最高 2 万，在校期间利息由财政全额补贴\n\n<!-- 成本标签: 钱=大 时间=中 毅力=些 收益=大 口径=钱 -->\n\n- 成本：首贷要学生和共同借款人跑一次县级学生资助管理中心（2026 年起共同借款人可选择远程授权办理）。之后每年续贷可线上办。\n- 说人话：这是在校生能拿到的、条件最好的资金。关键数：全日制普通本专科学生（含预科、高职、第二学士学位）每人每年最高 20000 元、不低于 1000 元；研究生每人每年最高 25000 元。**在校期间的利息全部由财政补贴，学生不用付。** 利率是同期同档次 LPR 减 70 个基点。贷款优先用于学费和住宿费，超出部分可以用于生活费。\n- 收益：国家助学贷款由政府主导、财政贴息。本专科每人每年最高 20000 元、研究生 25000 元；利率为同期五年期以上 LPR 减 70 个基点；学生在校期间利息全部由财政补贴；贷款期限为剩余在校时间加 15 年、最长不超过 22 年；毕业后 5 年为还本宽限期，宽限期内只需偿还利息。继续攻读学位的借款学生可申请还款计划变更、继续享受贴息。**办理国家助学贷款不收取任何费用，也不会要求转账。**\n- 路径：本科与高职同享本专科额度。**注意「本专科」三个字包含高职**——本专科每人每年最高 20000 元这一档，明确覆盖高等职业学校和高等专科学校学生。另外，专升本（继续攻读更高学位）的借款学生可以申请还款计划变更、继续享受贴息，这一步要在毕业当年 7 月 31 日前向县级学生资助管理部门提交书面证明。\n- 证据等级：A\n- 来源：国家开发银行《2026 年度生源地信用助学贷款开始受理》（转央视新闻）。<https://www.cdb.com.cn/ep/202608/t20260817_13510.html> ; 央广网《2026 年安徽省国家开发银行生源地信用助学贷款全面启动受理》。<https://www.cnr.cn/ah/news/20260715/t20260715_527711978.shtml>\n- 备注：给 A 是因为这是承办银行和官方媒体发布的政策口径。几个操作要点：受理时间通常在每年 7 月至 9 月（各省略有不同，如安徽为 7 月 15 日至 9 月 20 日）；首贷需要在线下办理（或共同借款人远程授权），之后可线上续贷；到校报到时要把受理证明交给学校，由学校在 10 月 10 日前录入系统。**毕业后如果当年 8 月 25 日前全部还清，个人不承担任何利息。**\n\n### 7. 毕业那一年，别漏了「一次性求职补贴」\n\n<!-- 成本标签: 钱=中 时间=少 毅力=否 收益=中 口径=钱 -->\n\n- 成本：填表、提交材料，可能几十分钟。\n- 说人话：这是一笔毕业学年才能申请的补贴，很多人到毕业都不知道有这回事。符合条件的情形通常包括：家庭享受城乡居民最低生活保障、城镇零就业家庭、本人持残疾人证、**在校期间获得过国家助学贷款**、本人持特困人员救助供养证等。注意第四类——只要你借过国家助学贷款，就可能符合条件，这个门槛比很多人想的低。\n- 收益：补贴对象为毕业学年积极求职创业的省内全日制普通高等学校、技工院校等非定向培养毕业生中，符合上述条件之一者，可自愿申请一次性求职补贴。**补贴标准由各省确定**：例如安徽 1500 元/人、江西 1000 元/人、湖南 1500 元/人。同时符合多类的只能按一种申领，已享受过的不再重复享受。流程一般为：个人线上申报 → 学校初审并公示 → 学校汇总向人社部门申报 → 人社部门复核后拨付至毕业生社保卡银行账户。\n- 证据等级：A\n- 来源：溆浦县促进高质量充分创业就业政策清单（湖南）。<https://www.xp.gov.cn/xp/c110249/202609/2ee84c0c4066461091a685ae49cccd39.shtml> ; 樟树市《【办事指南】困难高校毕业生一次性求职补贴办理》（江西）。<https://www.zhangshu.gov.cn/zssrmzf/jycy/pc/content/2102589352668098560/content_2102589352668098560.html> ; 金寨县《求职创业补贴申领办事指南》（安徽）。<https://www.ahjinzhai.gov.cn/public/6597231/38394836.html>\n- 备注：**这条必须按本省政策核实**——补贴名称、标准、条件各省不完全一致，本书列出的三个省只是为了说明「标准在 1000 到 1500 元这一档」，不是全国统一数。正确动作：毕业那年 9 月到 11 月，去本校学生资助中心或就业指导中心问一句「一次性求职补贴怎么申请」，或者在省人社厅官网搜「一次性求职补贴」。这个动作的成本是问一句话，收益是四位数。\n\n### 8. 申请材料别造假：处分和诚信记录是连着学位、荣誉和资助的\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=负 口径=安全 -->\n\n- 成本：不省钱不省时间。省的是「本来该准备的材料」。\n- 说人话：把家庭收入写低一点、把证明材料改一改、把别人的成果放进自己的申报材料里——这类操作的收益是几百到几千块，代价是被查实后的纪律处分，以及一条会跟着你的诚信记录。规章里写得很明确：对有严重失信行为的，可以规定给予相应纪律处分；对违背学术诚信的，可以对其获得学位及学术称号、荣誉等作出限制。\n- 收益：《普通高等学校学生管理规定》第二十条：「学校应当开展学生诚信教育，以适当方式记录学生学业、学术、品行等方面的诚信信息，建立对失信行为的约束和惩戒机制；对有严重失信行为的，可以规定给予相应的纪律处分，对违背学术诚信的，可以对其获得学位及学术称号、荣誉等作出限制。」第三十七条规定，对以作弊、剽窃、抄袭等学术不端行为或其他不正当手段获得学历证书、学位证书的，学校应当依法予以撤销。\n- 证据等级：A\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第二十条、第三十七条。<https://www.moe.gov.cn/jyb_xxgk/xxgk/zhengce/guizhang/202112/t20211206_585064.html>\n- 备注：给 A 是因为这是部门规章原文。写这一条不是为了吓人，是要把一个不对称说清楚：**资助金额的量级是百到千，而处分的量级是学位和荣誉。** 另外，如果确实家庭困难但材料凑不齐，正确的做法不是造材料，是直接找辅导员说明情况——学校有责任按国家规定为家庭经济困难学生提供教育救助，保证学生不因家庭经济困难而放弃学业（第十二条）。\n","10-宿舍作息与身体.md":"# 第 10 节 宿舍、作息与身体\n\n**口径**：健康（长期风险）／时间／安全\n\n这一节的前五条证据很硬（睡眠、运动、近视、抑郁筛查），后三条明显弱一些（宿舍关系）。这是本节的特点：**凡是「身体怎么运转」的事，证据都不错；凡是「人和人怎么相处」的事，证据都很差。**\n\n---\n\n### 1. 骑电动车和摩托车，头盔要戴，扣带要扣好\n\n<!-- 成本标签: 钱=少 时间=少 毅力=否 收益=大 口径=安全 -->\n\n- 成本：头盔 100 到 300 元一次。每次戴上多花 5 秒扣扣带。\n- 说人话：戴头盔并且把扣带扣好，出事时死亡概率低约四成，头部受伤低约七成。**松松垮垮挂在头上不算戴**——扣带不扣，撞一下头盔先飞出去。这是在校生最高频的致命风险，也是这一节里性价比最高的动作。\n- 收益：Cochrane 系统评价把多项研究合并计算，结论是摩托车骑行者戴头盔，死亡风险下降 42%（OR 0.58，95% CI 0.50–0.68），头部损伤下降 69%（OR 0.31，95% CI 0.25–0.38）。\n- 证据等级：A\n- 来源：Liu BC 等 (2008). Helmets for preventing injury in motorcycle riders. Cochrane Database of Systematic Reviews. <https://doi.org/10.1002/14651858.CD004333.pub3>（迁移自原书第 1 节第 2 条）\n- 备注：上面的数据来自摩托车研究，电动自行车没有直接研究，是按「撞上以后头部受伤的方式相同」推过来的——原书在备注里就明确写了这一点，迁移时保留。另外前排后排系安全带同样适用（NHTSA 估计轿车前排致命伤风险下降 45%），如果假期要开车回家，两条一起用。\n\n### 2. 睡不够，是你这一学期最大的单点风险\n\n<!-- 成本标签: 钱=0 时间=少 毅力=些 收益=大 口径=健康 -->\n\n- 成本：把入睡时间提前一点，或者把白天的低效时间砍掉一点。\n- 说人话：睡眠不只是「恢复精神」。记忆的巩固主要发生在睡眠中——你白天学的东西，是在睡着的时候才被固化进长期记忆的。**如果这一节只让你改一件事，改睡觉时间比改任何别的东西回报都高。** 而且它同时影响情绪、免疫和反应速度，这三样都直接影响你的考试和路上安全。\n- 收益：Rasch 和 Born 系统综述了睡眠在记忆中的作用，指出睡眠对记忆的巩固（consolidation）有主动贡献，包括对陈述性记忆和程序性记忆的加工。这解释了为什么「熬夜多学两小时」常常在效果上得不偿失：多学的内容没有被巩固，而当晚的睡眠损失还影响了第二天的效率。\n- 证据等级：B\n- 来源：Rasch B, Born J (2013). About sleep's role in memory. Physiological Reviews, 93(2), 681–766. <https://doi.org/10.1152/physrev.00032.2012>\n- 备注：给 B 的原因：睡眠与记忆巩固的机制研究扎实、结论一致，但「把睡觉时间提前多少、能提高多少分」这种量化结论做不出来（没法长期随机分配睡眠）。原书第 3、4 节把熬夜和补觉单独列条，这里并成一条，是因为对学生来说它们的操作结论是同一个：**别把睡眠当可挪用的预算。**\n\n### 3. 每周 150 分钟中等强度运动\n\n<!-- 成本标签: 钱=少 时间=中 毅力=是 收益=大 口径=健康 -->\n\n- 成本：每周 2.5 小时。操场跑步、打球、快走都算，不花钱。\n- 说人话：世卫组织给成年人的基线是**每周 150 到 300 分钟中等强度**有氧运动，或者 75 到 150 分钟高强度，两种可以按比例混。折下来是每天 20 到 40 分钟。别把它当成「为了身材」，它影响的是情绪、睡眠质量和长期慢病风险。\n- 收益：世界卫生组织《关于身体活动和久坐行为的指南》对成年人的建议为：每周进行 150 至 300 分钟中等强度有氧身体活动，或 75 至 150 分钟高强度有氧身体活动，或两种强度的等量组合；并建议每周进行 2 天及以上肌肉力量训练。\n- 证据等级：A\n- 来源：World Health Organization (2020). WHO Guidelines on Physical Activity and Sedentary Behaviour. <https://www.who.int/publications/i/item/9789240015128>\n- 备注：给 A 是因为这是基于大量证据综合形成的官方指南。一个对学生特别实用的补充：**把运动和别的事绑在一起**，比如固定「晚饭后和室友走一圈」，比「每周去三次健身房」更容易长期维持。另外，健身房按次付费或短周期付费，除非你已经有一年以上的稳定记录（迁移自原书第 5 节第 21 条）。\n\n### 4. 每天在户外待够 2 小时：这是目前唯一有随机试验支持的防近视办法\n\n<!-- 成本标签: 钱=0 时间=中 毅力=些 收益=大 口径=健康 -->\n\n- 成本：不花钱。把自习从室内挪到室外一部分就行。\n- 说人话：近视不是「配副眼镜就好」的事——度数越深，将来视网膜脱离、黄斑病变、青光眼的风险越高。而目前唯一被随机对照试验证明能减少新发近视的办法，就是**增加户外时间**。让眼睛接触户外光线，而不是靠吃什么或做眼保健操。\n- 收益：He 等人 2015 年在广州做的整群随机试验，给干预组学生在校期间每天额外安排 40 分钟户外活动（合计每天约 80 分钟），3 年后干预组近视累积发病率 30.4%（对照组 39.5%）。台湾 Wu 等人的研究也得出方向一致的结果。\n- 证据等级：A\n- 来源：He M 等 (2015). Effect of Time Spent Outdoors at School on the Prevention of Myopia and Related Eye Growth: A Randomized Clinical Trial. JAMA, 314(11), 1142–1150. <https://doi.org/10.1001/jama.2015.10803> ; Wu PC 等 (2013). Outdoor Activity during Class Recess Reduces Myopia Onset and Progression in School Children. Ophthalmology, 120(11), 2109–2116. <https://doi.org/10.1016/j.ophtha.2013.03.032>\n- 备注：**这里必须说清楚一个数字问题**：原书第 30 节第 4 条写的是「每天在户外待够 2 小时」，而 He 等人那项随机试验实际增加的是**每天 40 分钟、合计约 80 分钟**。「每天 2 小时」是文献里常用的目标建议值，不是那项试验的干预剂量——**这两个数不是一回事，不要混着引**。写在这里是因为本书的规矩是每个数字都要能查到出处。\n  补充一条同样有证据的：不要买号称能「治愈近视」「降低度数」的产品和服务（迁移自原书第 30 节第 9 条）。\n\n### 5. 情绪持续低落两周以上，去校心理咨询室或医院，别自己扛\n\n<!-- 成本标签: 钱=少 时间=中 毅力=些 收益=大 口径=健康 -->\n\n- 成本：校心理咨询室通常免费。就诊可能要花一点钱，医保可能覆盖部分。\n- 说人话：判断标准不是「我是不是矫情」，是**持续时间和功能影响**：情绪低落或兴趣减退持续两周以上，且已经影响到上课、睡眠、吃饭，就去看。校心理咨询室是免费的，第一次谈话不要求你说出全部。\n- 收益：抑郁筛查在成年人群中是被推荐的预防服务。原书第 30 节第 8 条针对 12 到 18 岁人群建议「做一次抑郁筛查，别拿学校的心理测评当诊断」——这条对大学生同样成立，只是年龄区间上移。\n- 证据等级：B\n- 来源：《高性价比人生指南》第 30 节第 8 条（迁移条目，原书未附文献）；大学生抑郁筛查的推荐依据来自成年人群筛查指南，本书未找到针对中国大学生群体的专门随机试验。\n- 备注：给 B 的原因：筛查有效这一点在成年人群中有指南支持，但具体到大学生群体缺少本土随机试验数据。迁移时保留原书那句提醒：**学校的心理测评不是诊断**，它只是筛子。另外三个可用的入口：校心理咨询室、学校附属或当地医院的精神科／心理科、以及全国统一的心理援助热线。\n\n### 6. 宿舍关系不是靠忍，是靠先把三件事说清\n\n<!-- 成本标签: 钱=0 时间=少 毅力=些 收益=中 口径=时间 -->\n\n- 成本：不花钱。开一次宿舍会议。\n- 说人话：把三件事在开学第一个月说明白，能省掉一整年的暗气：**几点关灯、空调开几度、别人睡觉时戴不戴耳机**。这三件事覆盖了宿舍矛盾里的绝大多数。说的时候要用「我」开头（「我十一点之后需要安静」），不要用「你」开头（「你别老那么晚打游戏」）。\n- 收益：没有研究测量过「宿舍公约」对关系质量的影响。有一点间接支持：宿舍矛盾的核心是可预期的规则缺失，而不是性格不合——但这属于机制推理，不是研究结论。\n- 证据等级：D\n- 来源：无。找不到相关研究。\n- 备注：给 D 的原因：找不到证据，且这类研究很难做（涉及隐私、无法随机分配室友）。写出来是因为它的成本极低。另外补一条务实的出口：如果关系已经僵到影响正常生活，**换宿舍是正规渠道**，去找辅导员或宿管办，走流程，不需要「忍到毕业」。\n\n### 7. 不拍室友发群里、不动室友的东西：这不是关系好不好的问题\n\n<!-- 成本标签: 钱=0 时间=0 毅力=否 收益=中 口径=安全 -->\n\n- 成本：不花钱。\n- 说人话：拍室友的照片、视频发到群里或者网上，动室友的私人物品，翻室友的快递——这些事不会因为「我们关系好」就变成可以做的。它们涉及的是别人的人身权和财产权，不取决于对方的容忍度。**关系好的时候是玩笑，关系崩了之后就是证据。**\n- 收益：《中华人民共和国民法典》规定了自然人享有隐私权、肖像权，以及财产权受法律保护。《普通高等学校学生管理规定》第四十二条规定学生不得有「从事或者参与有损大学生形象、有悖社会公序良俗的活动」等行为。原书第 9 节另有相关条目：「不偷拍别人，不在出租屋、民宿、酒店房间装摄像头」（第 12 条）。\n- 证据等级：A（法条存在）/ C（「宿舍场景下高发」这一判断）\n- 来源：《中华人民共和国民法典》人格权编、物权编 ; 《普通高等学校学生管理规定》（教育部令第 41 号）第四十二条。<https://www.moe.gov.cn/jyb_xxgk/xxgk/zhengce/guizhang/202112/t20211206_585064.html> ; 《高性价比人生指南》第 9 节第 12 条。\n- 备注：给 C 的那半句是因为没有宿舍场景下的专门统计。但结论强度不受影响。**这里有一条对学生特别值得点明的**：宿舍里最容易被忽略的一类侵权是「未经同意拍摄并传播」，而它在手机时代只需要三秒就能完成。判断标准是**对方是否同意**，不是你们关系怎么样。\n\n### 8. 违规电器和酗酒：这两个后果，一个是火灾，一个是处分\n\n<!-- 成本标签: 钱=少 时间=0 毅力=否 收益=负 口径=安全 -->\n\n- 成本：不用违规电器、不在宿舍喝酒，不损失什么。\n- 说人话：宿舍违规使用大功率电器是高校火灾的主要起因之一，而宿舍是低层高密度空间，一旦起火逃生条件很差。喝酒这件事则写在规章里：学生不得有酗酒、打架斗殴等违法行为。**这两件事的共同点是：成本很低，后果不可逆。**\n- 收益：《普通高等学校学生管理规定》第四十二条：「学生不得有酗酒、打架斗殴、赌博、吸毒，传播、复制、贩卖非法书刊和音像制品等违法行为；不得参与非法传销和进行邪教、封建迷信活动；不得从事或者参与有损大学生形象、有悖社会公序良俗的活动。学校发现学生在校内有违法行为或者严重精神疾病可能对他人造成伤害的，可以依法采取或者协助有关部门采取必要措施。」\n- 证据等级：B\n- 来源：《普通高等学校学生管理规定》（教育部令第 41 号）第四十二条 ; 原书第 1 节第 3 条（烟雾报警器对住宅火灾死亡风险的作用，OR 0.39，95% CI 0.18–0.83）——**注意：原书那条数据来自有人住的住宅，不是学生宿舍，不能直接套用，这里只作为「火灾致死风险与预警装置相关」的旁证。**\n- 备注：给 B 的原因：规章条款是硬的（A），但「宿舍违规电器是火灾主因」这个判断本书没找到可引用的官方统计，所以整体降到 B。**如果你在宿舍楼里发现消防通道被堵、灭火器过期，这是可以向宿管或学校安全部门反映的事，不是多事。**\n"};
+</script>
+<script>
+const FILES = [
+  "01-上课与听课.md",
+  "02-复习考试与绩点.md",
+  "03-四六级与英语.md",
+  "04-考证竞赛与技能.md",
+  "05-考驾照.md",
+  "06-学生会社团与学生工作.md",
+  "07-医保看病与体检.md",
+  "08-兼职实习与劳动权益.md",
+  "09-生活费奖助学金与防骗.md",
+  "10-宿舍作息与身体.md"
+];
+
+let ENTRIES = [];
+let SECTIONS = [];
+
+function parseBook(text, fileName, secIndex, secTitle){
+  const out = [];
+  const re = /^###\s+(\d+)\.\s+(.+?)\s*$/gm;
+  const marks = [];
+  let m;
+  while((m = re.exec(text)) !== null){
+    marks.push({no:+m[1], title:m[2], bodyStart:re.lastIndex});
+  }
+  marks.forEach((mk,i)=>{
+    const nextIdx = (i+1<marks.length) ? text.indexOf("\n### ", mk.bodyStart) : -1;
+    const seg = text.slice(mk.bodyStart, nextIdx === -1 ? text.length : nextIdx);
+    const tagM = seg.match(/<!--\s*成本标签:\s*([^>]*?)-->/);
+    const tags = {};
+    if(tagM){
+      tagM[1].split(/\s+/).forEach(kv=>{
+        const p = kv.split("=");
+        if(p.length===2) tags[p[0]] = p[1];
+      });
+    }
+    const fields = {};
+    seg.split("\n").forEach(line=>{
+      const fm = line.match(/^-\s*([^\s:：][^：]*?)：\s*([\s\S]*)$/);
+      if(fm){
+        const k = fm[1].trim();
+        if(!fields[k]) fields[k] = fm[2].trim();
+      }
+    });
+    const grade = fields["证据等级"] || "未标注";
+    out.push({
+      id: secIndex + "-" + mk.no,
+      no: mk.no,
+      title: mk.title,
+      sec: secIndex,
+      secTitle: secTitle,
+      grade: grade,
+      gkey: (grade.trim()[0] || "?").toUpperCase(),
+      cost: fields["成本"] || "",
+      plain: fields["说人话"] || "",
+      benefit: fields["收益"] || "",
+      path: fields["路径"] || "",
+      source: fields["来源"] || "",
+      note: fields["备注"] || "",
+      tags: tags,
+      hay: (mk.title + " " + Object.values(fields).join(" ")).toLowerCase()
+    });
+  });
+  return out;
+}
+
+function splitDoc(text){
+  const hm = text.match(/^#\s+第\s*\d+\s*节\s+(.+?)\s*$/m);
+  const title = hm ? hm[1] : "";
+  const start = hm ? hm.index + hm[0].length : 0;
+  const cut = text.indexOf("\n### ", start);
+  let pre = text.slice(start, cut === -1 ? text.length : cut);
+  pre = pre.split("\n").filter(l => !/^\s*-{3,}\s*$/.test(l)).join("\n").trim();
+  return {title, pre};
+}
+
+async function load(){
+  if(typeof EMBEDDED_BOOK !== "undefined"){
+    FILES.forEach((f,i)=>{
+      const text = EMBEDDED_BOOK[f];
+      if(text === undefined) return;
+      const {title, pre} = splitDoc(text);
+      entriesPush(text, f, i+1, title || f.replace(/^\d+-|\.md$/g,""), pre);
+    });
+    return {failed: []};
+  }
+  const failed = [];
+  const results = await Promise.all(FILES.map(async (f,i)=>{
+    for(let attempt = 0; attempt < 2; attempt++){
+      try{
+        const r = await fetch("./book/" + encodeURIComponent(f), {cache:"no-store"});
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        return {f, i:i+1, text: await r.text()};
+      }catch(e){
+        if(attempt === 1) failed.push(f + "（" + e.message + "）");
+      }
+    }
+    return null;
+  }));
+  results.filter(Boolean).forEach(r=>{
+    const {title, pre} = splitDoc(r.text);
+    entriesPush(r.text, r.f, r.i, title || r.f.replace(/^\d+-|\.md$/g,""), pre);
+  });
+  return {failed};
+}
+
+function entriesPush(text, file, idx, title, pre){
+  const es = parseBook(text, file, idx, title);
+  ENTRIES = ENTRIES.concat(es);
+  SECTIONS.push({sec:idx, title:title, pre:pre, count:es.length});
+}
+
+/* ---------- 渲染工具 ---------- */
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function rich(s, selfSec){
+  let h = esc(s);
+  h = h.replace(/&lt;(https?:\/\/[^<>\s]+)&gt;/g, (a,u)=>'<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>');
+  h = h.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  h = h.replace(/(原书|《高性价比人生指南》)\s*第\s*(\d+)\s*节第\s*(\d+)\s*条/g,
+        (a,who,sec,no)=>'<span class="refext">'+who+' 第'+sec+'节第'+no+'条（不在本指南内）</span>');
+  h = h.replace(/第\s*(\d+)\s*节第\s*(\d+)\s*条/g,
+        (a,sec,no)=>'<a class="reflink" data-sec="'+sec+'" data-no="'+no+'">第'+sec+'节第'+no+'条</a>');
+  h = h.replace(/本节第\s*(\d+)\s*条/g,
+        (a,no)=>'<a class="reflink" data-sec="'+selfSec+'" data-no="'+no+'">本节第'+no+'条</a>');
+  return h;
+}
+function preRich(s){
+  const lines = s.split("\n").map(x=>x.trim()).filter(Boolean);
+  return lines.map(l=>{
+    const lm = l.match(/^\*\*口径\*\*：\s*(.+)$/);
+    if(lm) return '<p><span class="lens">口径</span>'+rich(lm[1])+'</p>';
+    return '<p>'+rich(l)+'</p>';
+  }).join("");
+}
+
+const S = {q:"", grade:new Set(), money:new Set(), time:new Set(), grit:new Set(), ben:new Set(), kou:new Set()};
+const GRADE_LABEL = {A:"A 硬证据", B:"B 观察性数据", C:"C 规定或公开数据", D:"D 无直接证据"};
+const KOUMAP = {"时间":"省时间","学业":"学业绩点","安全":"安全与资格","钱":"省钱与权益","就业":"就业与收入","健康":"健康"};
+const MONEY_LABEL = {0:"不花钱", "少":"花一点", "中":"花中等", "大":"花大钱"};
+const TIME_LABEL  = {0:"不花时间", "少":"花一点", "中":"花中等", "大":"花很多"};
+const GRIT_LABEL  = {"否":"不要毅力", "些":"要一点毅力", "是":"要毅力"};
+const BEN_LABEL   = {"负":"负收益", "小":"收益小", "中":"收益中", "大":"收益大"};
+
+function chipsHTML(dim, map, cls){
+  return Object.keys(map).map(v=>'<button class="chip '+(cls||"")+'" data-dim="'+dim+'" data-v="'+v+'" aria-pressed="false">'+map[v]+'</button>').join("");
+}
+
+function initSide(){
+  document.getElementById("fgrade").innerHTML = ["A","B","C","D"]
+    .map(g=>'<button class="chip g'+g+'" data-dim="grade" data-v="'+g+'" aria-pressed="false">'+GRADE_LABEL[g]+'</button>').join("");
+  document.getElementById("fmoney").innerHTML = chipsHTML("money", MONEY_LABEL);
+  document.getElementById("ftime").innerHTML  = chipsHTML("time",  TIME_LABEL);
+  document.getElementById("fgrit").innerHTML  = chipsHTML("grit",  GRIT_LABEL);
+  document.getElementById("fben").innerHTML   = chipsHTML("ben",   BEN_LABEL);
+  const kous = [...new Set(ENTRIES.map(e=>e.tags["口径"]).filter(Boolean))];
+  const km = {}; kous.forEach(k=>km[k] = KOUMAP[k] || k);
+  document.getElementById("fkou").innerHTML = chipsHTML("kou", km);
+  renderToc();
+}
+
+function renderToc(){
+  const toc = document.getElementById("toc");
+  if(!toc) return;
+  const list = ENTRIES.filter(match);
+  const cnt = {};
+  list.forEach(e=>{ cnt[e.sec] = (cnt[e.sec]||0)+1; });
+  toc.innerHTML = SECTIONS.map(s=>{
+    const c = cnt[s.sec] || 0;
+    const sub = list.filter(e=>e.sec===s.sec);
+    return '<button class="toc-row'+(c?"":" dim")+'" data-sec="'+s.sec+'">'
+      + '<span class="no">'+String(s.sec).padStart(2,"0")+'</span>'
+      + '<span class="tl">'+esc(s.title)+'</span>'
+      + '<span class="ct">'+c+'</span>'
+      + '<span class="cv">›</span>'
+      + '</button>'
+      + '<div class="toc-sub" data-sub="'+s.sec+'">'
+      + (sub.length
+          ? sub.map(e=>'<a data-sec="'+e.sec+'" data-no="'+e.no+'">'+esc(e.title)+'</a>').join("")
+          : '<div class="toc-empty">这一节没有命中的条目</div>')
+      + '</div>';
+  }).join("");
+  syncSub();
+}
+
+function syncSub(){
+  const active = document.querySelector(".toc-sub.open");
+  if(active) active.classList.remove("open");
+  const row = document.querySelector(".toc-row.on");
+  if(row){
+    const sub = document.querySelector('.toc-sub[data-sub="'+row.dataset.sec+'"]');
+    if(sub && sub.querySelector("a")) sub.classList.add("open");
+  }
+}
+
+function match(e){
+  if(S.q){
+    const q = S.q.toLowerCase();
+    if(e.hay.indexOf(q) === -1) return false;
+  }
+  if(S.grade.size && !S.grade.has(e.gkey)) return false;
+  if(S.money.size && !S.money.has(e.tags["钱"])) return false;
+  if(S.time.size && !S.time.has(e.tags["时间"])) return false;
+  if(S.grit.size && !S.grit.has(e.tags["毅力"])) return false;
+  if(S.ben.size && !S.ben.has(e.tags["收益"])) return false;
+  if(S.kou.size && !S.kou.has(e.tags["口径"])) return false;
+  return true;
+}
+
+function entHTML(e){
+  const tags = [];
+  tags.push('<span class="tg tg'+e.gkey+'">'+esc(GRADE_LABEL[e.gkey] || e.grade)+'</span>');
+  const t = e.tags, mono = [];
+  if(t["钱"]!==undefined) mono.push("钱="+t["钱"]);
+  if(t["时间"]!==undefined) mono.push("时间="+t["时间"]);
+  if(t["毅力"]!==undefined) mono.push("毅力="+t["毅力"]);
+  if(t["收益"]!==undefined) mono.push("收益="+t["收益"]);
+  if(t["口径"]!==undefined) mono.push("口径="+t["口径"]);
+  if(mono.length) tags.push('<span class="tg tgx">'+esc(mono.join(" "))+'</span>');
+
+  const body = [];
+  if(e.cost) body.push('<div class="fld"><span class="k">成本</span><span class="v">'+rich(e.cost,e.sec)+'</span></div>');
+  if(e.benefit) body.push('<div class="fld"><span class="k">收益</span><span class="v">'+rich(e.benefit,e.sec)+'</span></div>');
+  if(e.path) body.push('<div class="fld path"><span class="k">路径</span><span class="v">'+rich(e.path,e.sec)+'</span></div>');
+  if(e.note) body.push('<div class="fld note"><span class="k">备注</span><span class="v">'+rich(e.note,e.sec)+'</span></div>');
+  const srcFold = e.source
+    ? '<details class="src-fold"><summary><span class="k">来源</span>展开出处</summary>'
+      + '<div class="fld src"><span class="k">来源</span><span class="v">'+rich(e.source,e.sec)+'</span></div></details>'
+    : "";
+
+  return '<article class="ent" id="e-'+e.id+'" data-sec="'+e.sec+'" data-no="'+e.no+'">'
+    + '<div class="ent-h"><span class="ent-no">'+e.sec+'-'+e.no+'</span><h3 class="ent-t">'+esc(e.title)+'</h3></div>'
+    + '<div class="ent-tag">'+tags.join("")+'</div>'
+    + '<p class="ent-plain">'+rich(e.plain,e.sec)+'</p>'
+    + '<button class="ent-btn">展开成本、收益、备注与来源</button>'
+    + '<div class="ent-body">'+body.join("")+srcFold+'</div>'
+    + '</article>';
+}
+
+function render(){
+  const list = ENTRIES.filter(match);
+  const g = {A:0,B:0,C:0,D:0,other:0};
+  list.forEach(e=>{ if(g[e.gkey]!==undefined) g[e.gkey]++; else g.other++; });
+
+  const live = document.getElementById("live");
+  if(list.length === ENTRIES.length){
+    live.className = "stat-live";
+  } else {
+    live.className = "stat-live show";
+    live.innerHTML = "当前筛选命中 <b>"+list.length+"</b> / "+ENTRIES.length+" 条 &nbsp;·&nbsp; 其中 A "+g.A+" · B "+g.B+" · C "+g.C+" · D "+g.D;
+  }
+
+  const box = document.getElementById("list");
+  document.getElementById("empty").hidden = list.length > 0;
+  document.getElementById("status").style.display = "none";
+
+  const groups = new Map();
+  list.forEach(e=>{
+    if(!groups.has(e.sec)) groups.set(e.sec, []);
+    groups.get(e.sec).push(e);
+  });
+
+  const html = [];
+  SECTIONS.forEach(s=>{
+    const es = groups.get(s.sec);
+    if(!es) return;
+    html.push('<section class="sec" id="s-'+s.sec+'">');
+    html.push('<div class="sec-h"><span class="no">第 '+s.sec+' 节</span><h2>'+esc(s.title)+'</h2><span class="n">'+es.length+' 条</span></div>');
+    if(s.pre) html.push('<div class="sec-pre">'+preRich(s.pre)+'</div>');
+    es.forEach(e=>html.push(entHTML(e)));
+    html.push('</section>');
+  });
+
+  box.innerHTML = html.join("");
+  renderToc();
+  spy();
+}
+
+/* ---------- 交互 ---------- */
+function clearAll(){
+  ["grade","money","time","grit","ben","kou"].forEach(k=>S[k].clear());
+  S.q = ""; document.getElementById("q").value = "";
+  document.getElementById("searchwrap").classList.remove("has");
+  document.querySelectorAll('.chip[aria-pressed="true"]').forEach(c=>c.setAttribute("aria-pressed","false"));
+  clearPresetUI();
+}
+function clearPresetUI(){
+  document.querySelectorAll(".pre button[data-p]").forEach(b=>b.classList.remove("on"));
+}
+
+function scrollToSec(sec){
+  const el = document.getElementById("s-"+sec);
+  if(el) window.scrollTo({top: el.getBoundingClientRect().top + window.pageYOffset - 72, behavior:"smooth"});
+}
+
+function jump(sec, no){
+  let el = document.getElementById("e-"+sec+"-"+no);
+  if(!el){
+    clearAll(); render();
+    el = document.getElementById("e-"+sec+"-"+no);
+  }
+  if(!el) return;
+  el.classList.add("open");
+  const btn = el.querySelector(".ent-btn");
+  if(btn) btn.textContent = "收起";
+  document.querySelectorAll(".ent.hi").forEach(x=>x.classList.remove("hi"));
+  el.classList.add("hi");
+  window.scrollTo({top: el.getBoundingClientRect().top + window.pageYOffset - 82, behavior:"smooth"});
+  setTimeout(()=>el.classList.remove("hi"), 2600);
+  const sub = document.querySelector('.toc-sub[data-sub="'+sec+'"] a[data-no="'+no+'"]');
+  if(sub) sub.classList.add("on");
+}
+
+let spyLock = 0;
+function spy(){
+  const rows = [...document.querySelectorAll(".toc-row")];
+  const secs = [...document.querySelectorAll(".sec")];
+  if(!secs.length) return;
+  const y = window.pageYOffset + 110;
+  let cur = secs[0].id;
+  secs.forEach(s=>{ if(s.getBoundingClientRect().top + window.pageYOffset <= y) cur = s.id; });
+  const secNo = cur.replace("s-","");
+  rows.forEach(r=>r.classList.toggle("on", r.dataset.sec === secNo));
+  syncSub();
+
+  const ents = [...document.querySelectorAll(".ent")];
+  let curE = null;
+  ents.forEach(e=>{ if(e.getBoundingClientRect().top + window.pageYOffset <= y) curE = e.id; });
+  document.querySelectorAll(".toc-sub a").forEach(a=>{
+    a.classList.toggle("on", curE !== null && a.dataset.sec + "-" + a.dataset.no === curE.replace("e-",""));
+  });
+
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById("prog").style.width = (h > 0 ? Math.min(100, window.pageYOffset / h * 100) : 0) + "%";
+  document.getElementById("top").classList.toggle("show", window.pageYOffset > 700);
+}
+
+document.addEventListener("click", ev=>{
+  const chip = ev.target.closest(".chip");
+  if(chip){
+    const k = chip.dataset.dim, v = chip.dataset.v;
+    if(!S[k]) return;
+    S[k].has(v) ? S[k].delete(v) : S[k].add(v);
+    chip.setAttribute("aria-pressed", S[k].has(v) ? "true" : "false");
+    clearPresetUI();
+    render(); spy(); return;
+  }
+  const pre = ev.target.closest("#presets button[data-p]");
+  if(pre){
+    clearAll();
+    const p = pre.dataset.p;
+    if(p==="lazy"){ S.money.add("0"); S.time.add("0"); S.grit.add("否"); S.ben.add("大"); }
+    if(p==="hard") S.grade.add("A");
+    if(p==="edge") S.grade.add("D");
+    if(p==="red")  S.kou.add("安全");
+    document.querySelectorAll('.chip[data-dim="grade"]').forEach(c=>c.setAttribute("aria-pressed", S.grade.has(c.dataset.v)?"true":"false"));
+    document.querySelectorAll('.chip[data-dim="money"]').forEach(c=>c.setAttribute("aria-pressed", S.money.has(c.dataset.v)?"true":"false"));
+    document.querySelectorAll('.chip[data-dim="time"]').forEach(c=>c.setAttribute("aria-pressed", S.time.has(c.dataset.v)?"true":"false"));
+    document.querySelectorAll('.chip[data-dim="grit"]').forEach(c=>c.setAttribute("aria-pressed", S.grit.has(c.dataset.v)?"true":"false"));
+    document.querySelectorAll('.chip[data-dim="ben"]').forEach(c=>c.setAttribute("aria-pressed", S.ben.has(c.dataset.v)?"true":"false"));
+    document.querySelectorAll('.chip[data-dim="kou"]').forEach(c=>c.setAttribute("aria-pressed", S.kou.has(c.dataset.v)?"true":"false"));
+    document.querySelectorAll(".pre button[data-p]").forEach(b=>b.classList.remove("on"));
+    pre.classList.add("on");
+    render(); spy(); return;
+  }
+  const row = ev.target.closest(".toc-row");
+  if(row){
+    const sec = row.dataset.sec;
+    const sub = document.querySelector('.toc-sub[data-sub="'+sec+'"]');
+    const isOpen = sub && sub.classList.contains("open") && row.classList.contains("on");
+    if(isOpen){ sub.classList.remove("open"); row.classList.remove("on"); return; }
+    document.querySelectorAll(".toc-sub.open").forEach(x=>x.classList.remove("open"));
+    document.querySelectorAll(".toc-row.on").forEach(x=>x.classList.remove("on"));
+    row.classList.add("on");
+    if(sub) sub.classList.add("open");
+    scrollToSec(sec);
+    document.getElementById("side").classList.remove("open");
+    return;
+  }
+  const suba = ev.target.closest(".toc-sub a");
+  if(suba){ jump(suba.dataset.sec, suba.dataset.no); document.getElementById("side").classList.remove("open"); return; }
+
+  const link = ev.target.closest(".reflink");
+  if(link){ jump(link.dataset.sec, link.dataset.no); return; }
+
+  const btn = ev.target.closest(".ent-btn");
+  if(btn){
+    const card = btn.closest(".ent");
+    card.classList.toggle("open");
+    btn.textContent = card.classList.contains("open") ? "收起" : "展开成本、收益、备注与来源";
+    return;
+  }
+  if(ev.target.id === "rst"){ clearAll(); render(); spy(); return; }
+  if(ev.target.id === "reset2"){ clearAll(); render(); spy(); return; }
+  if(ev.target.id === "top"){ window.scrollTo({top:0, behavior:"smooth"}); return; }
+  if(ev.target.id === "toggle"){ document.getElementById("side").classList.toggle("open"); return; }
+  if(ev.target.id === "mask"){ document.getElementById("side").classList.remove("open"); return; }
+  if(ev.target.id === "qclr"){
+    S.q=""; document.getElementById("q").value="";
+    document.getElementById("searchwrap").classList.remove("has");
+    clearPresetUI();
+    render(); spy(); return;
+  }
+});
+
+document.addEventListener("input", ev=>{
+  if(ev.target.id !== "q") return;
+  S.q = ev.target.value.trim();
+  document.getElementById("searchwrap").classList.toggle("has", S.q.length > 0);
+  clearPresetUI();
+  render(); spy();
+});
+
+window.addEventListener("keydown", ev=>{
+  if((ev.metaKey || ev.ctrlKey) && ev.key === "k"){
+    ev.preventDefault(); document.getElementById("q").focus();
+  }
+  if(ev.key === "Escape"){ document.getElementById("side").classList.remove("open"); }
+});
+
+let raf = 0;
+window.addEventListener("scroll", ()=>{
+  if(raf) return;
+  raf = requestAnimationFrame(()=>{ raf = 0; spy(); });
+}, {passive:true});
+window.addEventListener("resize", ()=>{ raf = 0; spy(); });
+
+(async function(){
+  let res;
+  try{ res = await load(); }
+  catch(err){ res = {failed: ["未预期的错误：" + err.message]}; }
+
+  if(!ENTRIES.length){
+    const local = location.protocol === "file:";
+    document.getElementById("status").innerHTML = local
+      ? '<b>正文读取失败——你像是把 index.html 直接双击打开的。</b><br><br>'
+        + '浏览器不允许网页读取本地文件，所以这里会是空的。三种解法，任选一种：<br>'
+        + '1. 在项目目录下运行 <code>python3 -m http.server 8000</code>，再访问 <code>http://localhost:8000/</code><br>'
+        + '2. 直接打开 <b>dist/ 目录下的离线单文件版</b>，那个双击就能用<br>'
+        + '3. 把整个项目目录丢给任意静态服务器'
+      : '<b>正文一条都没读到。</b><br><br>请确认 <code>book/</code> 目录和 index.html 在同一个目录下，且文件名没有被改过。<br>'
+        + '如果是在微信里打开的，请用离线单文件版。';
+    return;
+  }
+
+  const g = {A:0,B:0,C:0,D:0};
+  ENTRIES.forEach(e=>{ if(g[e.gkey]!==undefined) g[e.gkey]++; });
+  const red = ENTRIES.filter(e=>e.tags["口径"] && e.tags["口径"].indexOf("安全")>-1).length;
+  document.getElementById("meta").innerHTML = [
+    ["条目", ENTRIES.length], ["章节", SECTIONS.length],
+    ["A 硬证据", g.A], ["B 观察性", g.B], ["C 规定", g.C], ["D 无直接证据", g.D],
+    ["红线（安全口径）", red], ["高职／本科分叉", ENTRIES.filter(e=>e.path).length]
+  ].map(x=>'<div><b>'+x[1]+'</b><span>'+x[0]+'</span></div>').join("");
+
+  initSide();
+  render();
+  spy();
+
+  if(res.failed && res.failed.length){
+    const w = document.createElement("div");
+    w.className = "warn";
+    w.innerHTML = '<b>有 '+res.failed.length+' 节没读到，下面显示的条目不完整。</b>'
+      + '<br>' + res.failed.map(esc).join("<br>");
+    document.getElementById("list").insertBefore(w, document.getElementById("list").firstChild);
+  }
+})();
+</script>
+</body>
+</html>

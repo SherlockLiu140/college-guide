@@ -156,6 +156,21 @@ node tools/build-all.mjs
 
 在线版会立刻反映改动（页面直接读 `book/`，刷新即可）。另外三种格式要重新生成。
 
+### 推送
+
+普通 `git push` 需要连 github.com:443。如果所在网络只放行 `api.github.com`（`git push` 会报
+`CONNECT tunnel failed, response 502`，直连也连不上），可以用仓库自带的脚本改走 REST API：
+
+```bash
+python3 tools/push-via-api.py --dry-run   # 先检查
+python3 tools/push-via-api.py             # 推送
+```
+
+它会把当前 HEAD 的 blob 逐个上传、建 tree 和 commit、更新分支，并且**校验远端算出的
+blob / tree / commit SHA 与本地完全一致**，不一致就中止——不会出现「推上去了但内容和本地不同」。
+脚本头部注释里写了为什么 commit 的 SHA 可能对不上（时区偏移和提交信息结尾换行都算进哈希），
+以及它怎么绕过这一点。
+
 ## 已知限制
 
 - PDF 里有个别行会把句号或顿号挤到下一行行首（约 52 页里 2 处）。原因是 reportlab 的中文断行对「恰好排满一行」的取舍，不是内容问题。

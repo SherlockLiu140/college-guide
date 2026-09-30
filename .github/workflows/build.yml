@@ -56,8 +56,12 @@ jobs:
             dist/大学生生活指南-离线版.html
           if-no-files-found: error
 
+      # enablement: true —— 仓库还没开启 Pages 时自动开启（fork 之后不用手动去 Settings 里设）。
+      # 不加这一项时，configure-pages 在未开启 Pages 的仓库上会直接失败。
       - name: 配置 Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       # 整理出一个干净的站点目录再发布：不要带 .git、tools/ 这些。
       # 页脚有指向 skills/college-guide/README.md 的链接，所以 skills/ 要一起发。

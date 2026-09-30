@@ -64,12 +64,27 @@ jobs:
           enablement: true
 
       # 整理出一个干净的站点目录再发布：不要带 .git、tools/ 这些。
-      # 页脚有指向 skills/college-guide/README.md 的链接，所以 skills/ 要一起发。
+      # 注意：页脚链接指向 NOTICE.md / LICENSE / skills/college-guide/README.md，
+      # 这几个必须一起发，否则线上是死链（这个坑踩过一次）。
       - name: 整理站点目录
         run: |
+          set -e
           mkdir -p _site
-          cp index.html robots.txt .nojekyll _site/
+          cp index.html robots.txt .nojekyll README.md LICENSE NOTICE.md _site/
           cp -r book dist skills _site/
+          # 自检：首页里 href="./xxx" 指向的本地路径必须都在站点目录里
+          links=$(grep -o 'href="\./[^"]*"' index.html | sed 's|href="\./||; s|"$||' | sort -u)
+          missing=""
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            [ -e "_site/$f" ] || missing="$missing $f"
+          done <<< "$links"
+          if [ -n "$missing" ]; then
+            echo "::error::站点缺少首页链接到的文件:$missing"
+            exit 1
+          fi
+          echo "首页本地链接自检通过（$(echo "$links" | wc -l) 个）"
+          echo "站点文件:"
           find _site -type f | sort
 
       - name: 打包站点
